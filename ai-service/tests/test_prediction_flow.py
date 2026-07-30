@@ -1,6 +1,12 @@
 from app.core.security import encode_jwt
 
 
+def test_docs_endpoint_is_public(client):
+    resp = client.get("/docs")
+    assert resp.status_code == 200
+    assert "swagger" in resp.text.lower()
+
+
 def test_predict_endpoint(client):
     token = encode_jwt({"sub": "unit-test", "role": "test"})
     resp = client.post(

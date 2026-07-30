@@ -9,7 +9,21 @@ from app.core.security import decode_jwt
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable):
-        if request.url.path in {"/docs", "/openapi.json", "/health", "/api/v1/health"}:
+        path = request.url.path
+        public_paths = {
+            "/",
+            "/docs",
+            "/docs/",
+            "/openapi.json",
+            "/favicon.ico",
+            "/health",
+            "/api/v1/health",
+            "/api/v1/docs",
+            "/api/v1/docs/",
+            "/api/v1/openapi.json",
+        }
+
+        if path in public_paths or path.startswith("/docs") or path.startswith("/api/v1/docs"):
             return await call_next(request)
 
         auth_header = request.headers.get("Authorization", "")

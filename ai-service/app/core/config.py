@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     API_PREFIX: str = Field("/api/v1", env="API_PREFIX")
     DATABASE_URL: str = Field(..., env="DATABASE_URL")
     REDIS_URL: str = Field(..., env="REDIS_URL")
-    JWT_SECRET: str = Field(..., env="JWT_SECRET")
+    JWT_SECRET: str = Field("change-me-local-intelsense-ai-jwt-signing-key-2026", env="JWT_SECRET")
     JWT_ALGORITHM: str = Field("HS256", env="JWT_ALGORITHM")
     MODEL_CACHE_DIR: str = Field("/models", env="MODEL_CACHE_DIR")
     USE_DUMMY_MODELS: bool = Field(True, env="USE_DUMMY_MODELS")

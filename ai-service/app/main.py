@@ -10,13 +10,30 @@ from app.cache.redis_client import redis_client
 from app.services.ai_manager import AIManager
 
 
+from fastapi.openapi.utils import get_openapi
+
+
 def create_app() -> FastAPI:
     init_logging()
     app = FastAPI(
         title=settings.APP_NAME,
-        openapi_url=f"{settings.API_PREFIX}/openapi.json",
-        docs_url=f"{settings.API_PREFIX}/docs",
+        openapi_url="/openapi.json",
+        docs_url="/docs",
     )
+
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        openapi_schema = get_openapi(
+            title=app.title,
+            version="1.0.0",
+            description="IntelSense AI service",
+            routes=app.routes,
+        )
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+
+    app.openapi = custom_openapi
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"] if settings.ENVIRONMENT == "development" else [],

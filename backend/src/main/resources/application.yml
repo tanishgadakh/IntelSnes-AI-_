@@ -20,7 +20,7 @@ ai:
     base-url: http://localhost:8000/api/v1
 
 jwt:
-  secret: change-me-local-intelsense-ai-jwt-signing-key-2026
+  secret: ${JWT_SECRET:change-me-local-intelsense-ai-jwt-signing-key-2026}
   expiration-ms: 86400000
 
 springdoc:
