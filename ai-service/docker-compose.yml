@@ -9,7 +9,7 @@ services:
       - db
       - redis
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@db:5432/intelsense_ai}
+      DATABASE_URL: ${DATABASE_URL:-mysql+aiomysql://Tanishg16:Tanish@2009@db:3306/intelsense_ai}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       JWT_SECRET: ${JWT_SECRET:-change-me-local-intelsense-ai-jwt-signing-key-2026}
       USE_DUMMY_MODELS: ${USE_DUMMY_MODELS:-true}
@@ -20,15 +20,17 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:15
+    image: mysql:8.0
     environment:
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-intelsense_ai}
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: intelsense_ai
+      MYSQL_USER: Tanishg16
+      MYSQL_PASSWORD: Tanish@2009
     ports:
-      - "5432:5432"
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     restart: unless-stopped
 
   redis:
@@ -38,4 +40,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  mysql_data:

@@ -254,7 +254,7 @@ AI service connection:
 DATABASE_URL=mysql+aiomysql://Tanishg16:Tanish@2009@localhost:3306/intelsense_ai
 ```
 
-> The AI service Docker compose defaults to Postgres, so override `DATABASE_URL` for a MySQL local setup.
+> The AI service Docker compose now uses MySQL by default for local development. If you want Postgres, override `DATABASE_URL` and update the compose service accordingly.
 
 ---
 

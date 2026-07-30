@@ -47,7 +47,7 @@ LOG_LEVEL=INFO
 EOF
 ```
 
-> Note: `ai-service/.env.example` defaults to PostgreSQL. For local MySQL, override the URL as shown above.
+> Note: `ai-service/.env.example` previously defaulted to PostgreSQL. This local setup uses MySQL and the `ai-service/docker-compose.yml` now matches MySQL credentials.
 
 ## 5. Install AI service dependencies
 

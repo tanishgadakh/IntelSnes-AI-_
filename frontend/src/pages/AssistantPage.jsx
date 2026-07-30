@@ -8,7 +8,7 @@ const starterMessages = [
   'Suggest three actions to improve satisfaction.'
 ];
 
-export default function AssistantPage() {
+export default function AssistantPage({ token }) {
   const [messages, setMessages] = useState([
     { role: 'assistant', text: 'I can help summarize reviews, identify themes, and suggest next actions for your team.' }
   ]);
@@ -27,7 +27,9 @@ export default function AssistantPage() {
     setLoading(true);
 
     try {
-      const res = await api.post('/api/assistant', { prompt });
+      const res = await api.post('/api/assistant', { prompt }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const data = res.data || {};
       const responseText = data.response || data.summary || 'No response received from the AI service.';
       setMessages((prev) => [...prev.slice(0, -1), { role: 'assistant', text: responseText }]);

@@ -8,8 +8,7 @@ and any database-dependent service components.
 
 from __future__ import annotations
 
-from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseSettings, Field, validator
 
 
 class DatabaseSettings(BaseSettings):
@@ -20,46 +19,42 @@ class DatabaseSettings(BaseSettings):
     local development and production deployment scenarios.
     """
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore",
-    )
+    host: str = Field(default="localhost", env="DB_HOST")
+    port: int = Field(default=3306, env="DB_PORT")
+    username: str = Field(default="root", env="DB_USERNAME")
+    password: str = Field(default="", env="DB_PASSWORD")
+    database: str = Field(default="intelsense_ai", env="DB_NAME")
+    charset: str = Field(default="utf8mb4", env="DB_CHARSET")
+    pool_size: int = Field(default=10, env="DB_POOL_SIZE")
+    max_overflow: int = Field(default=20, env="DB_MAX_OVERFLOW")
+    pool_pre_ping: bool = Field(default=True, env="DB_POOL_PRE_PING")
+    echo: bool = Field(default=False, env="DB_ECHO")
+    ssl_disabled: bool = Field(default=True, env="DB_SSL_DISABLED")
+    connect_timeout: int = Field(default=30, env="DB_CONNECT_TIMEOUT")
+    isolation_level: str = Field(default="READ COMMITTED", env="DB_ISOLATION_LEVEL")
+    timezone: str = Field(default="UTC", env="DB_TIMEZONE")
 
-    host: str = Field(default="localhost", alias="DB_HOST")
-    port: int = Field(default=3306, alias="DB_PORT")
-    username: str = Field(default="root", alias="DB_USERNAME")
-    password: str = Field(default="", alias="DB_PASSWORD")
-    database: str = Field(default="intelsense_ai", alias="DB_NAME")
-    charset: str = Field(default="utf8mb4", alias="DB_CHARSET")
-    pool_size: int = Field(default=10, alias="DB_POOL_SIZE")
-    max_overflow: int = Field(default=20, alias="DB_MAX_OVERFLOW")
-    pool_pre_ping: bool = Field(default=True, alias="DB_POOL_PRE_PING")
-    echo: bool = Field(default=False, alias="DB_ECHO")
-    ssl_disabled: bool = Field(default=True, alias="DB_SSL_DISABLED")
-    connect_timeout: int = Field(default=30, alias="DB_CONNECT_TIMEOUT")
-    isolation_level: str = Field(default="READ COMMITTED", alias="DB_ISOLATION_LEVEL")
-    timezone: str = Field(default="UTC", alias="DB_TIMEZONE")
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = False
+        extra = "ignore"
 
-    @field_validator("host", "username", "password", "database")
-    @classmethod
+    @validator("host", "username", "password", "database", pre=True, always=True)
     def validate_required_strings(cls, value: str) -> str:
         """Ensure string-based database fields are not blank."""
         if value is None:
             return ""
-        return value.strip()
+        return str(value).strip()
 
-    @field_validator("port")
-    @classmethod
+    @validator("port")
     def validate_port(cls, value: int) -> int:
         """Ensure the configured database port is valid."""
         if value <= 0 or value > 65535:
             raise ValueError("Database port must be between 1 and 65535")
         return value
 
-    @field_validator("pool_size", "max_overflow", "connect_timeout")
-    @classmethod
+    @validator("pool_size", "max_overflow", "connect_timeout")
     def validate_positive_int(cls, value: int) -> int:
         """Ensure numeric database settings are positive."""
         if value <= 0:
