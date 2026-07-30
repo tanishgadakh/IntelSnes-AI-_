@@ -12,6 +12,6 @@ def summarize_text(text: str):
     if settings.USE_DUMMY_MODELS:
         return dummy_summary(text)
     if SummarizationModel is None:
-        return dummy_summary(text)
+        raise RuntimeError("Summarization model is unavailable. Install transformers and torch for real model support.")
     model = SummarizationModel()
     return model.summarize(text)

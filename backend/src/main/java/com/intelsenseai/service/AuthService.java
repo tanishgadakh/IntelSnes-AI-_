@@ -2,6 +2,7 @@ package com.intelsenseai.service;
 
 import com.intelsenseai.dto.AuthRequest;
 import com.intelsenseai.dto.AuthResponse;
+import com.intelsenseai.entity.Role;
 import com.intelsenseai.entity.User;
 import com.intelsenseai.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,8 +31,8 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Invalid username or password");
         }
-        String token = jwtService.generateToken(user.getUsername());
-        return new AuthResponse(token);
+        String token = jwtService.generateToken(user.getUsername(), user.getRole().name());
+        return new AuthResponse(token, user.getRole().name());
     }
 
     public User register(AuthRequest request) {
@@ -41,6 +42,7 @@ public class AuthService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.VIEWER);
         return userRepository.save(user);
     }
 }

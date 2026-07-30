@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -34,7 +35,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/auth/**", "/api/health").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/feedback").hasAnyRole("ADMIN", "MANAGER", "ANALYST")
+                .requestMatchers("/api/assistant/**").hasAnyRole("ADMIN", "MANAGER", "ANALYST")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtService), org.springframework.security.web.access.intercept.AuthorizationFilter.class);
@@ -71,8 +73,10 @@ public class SecurityConfig {
                 try {
                     if (jwtService.validateToken(token)) {
                         String username = jwtService.extractUsername(token);
+                        String role = jwtService.extractRole(token);
+                        SimpleGrantedAuthority authority = role != null ? new SimpleGrantedAuthority("ROLE_" + role) : null;
                         UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                                new UsernamePasswordAuthenticationToken(username, null, authority != null ? List.of(authority) : Collections.emptyList());
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }

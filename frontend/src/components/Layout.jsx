@@ -1,21 +1,21 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/prediction', label: 'AI Workspace' },
-  { to: '/analytics', label: 'Analytics' },
-  { to: '/history', label: 'Prediction History' },
-  { to: '/reports', label: 'Reports' },
-  { to: '/assistant', label: 'AI Assistant' },
-  { to: '/notifications', label: 'Notifications' },
-  { to: '/admin', label: 'User Management' },
-  { to: '/monitoring', label: 'System Monitoring' },
-  { to: '/model-center', label: 'Model Center' },
-  { to: '/settings', label: 'Settings' },
-  { to: '/profile', label: 'Profile' }
+  { to: '/dashboard', label: 'Dashboard', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
+  { to: '/prediction', label: 'AI Workspace', roles: [ 'ADMIN', 'MANAGER', 'ANALYST' ] },
+  { to: '/analytics', label: 'Analytics', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
+  { to: '/history', label: 'Prediction History', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
+  { to: '/reports', label: 'Reports', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
+  { to: '/assistant', label: 'AI Assistant', roles: [ 'ADMIN', 'MANAGER', 'ANALYST' ] },
+  { to: '/notifications', label: 'Notifications', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
+  { to: '/admin', label: 'User Management', roles: [ 'ADMIN' ] },
+  { to: '/monitoring', label: 'System Monitoring', roles: [ 'ADMIN', 'MANAGER' ] },
+  { to: '/model-center', label: 'Model Center', roles: [ 'ADMIN', 'MANAGER', 'ANALYST' ] },
+  { to: '/settings', label: 'Settings', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
+  { to: '/profile', label: 'Profile', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] }
 ];
 
-export default function Layout({ token, onLogout, theme, onThemeToggle }) {
+export default function Layout({ token, role, onLogout, theme, onThemeToggle }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -34,7 +34,7 @@ export default function Layout({ token, onLogout, theme, onThemeToggle }) {
           </div>
         </div>
         <nav>
-          {navItems.map((item) => (
+          {navItems.filter((item) => item.roles.includes(role)).map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               {item.label}
             </NavLink>
@@ -50,8 +50,8 @@ export default function Layout({ token, onLogout, theme, onThemeToggle }) {
           </div>
           <div className="topbar-actions">
             <button className="theme-toggle" onClick={onThemeToggle}>{theme === 'dark' ? '☀️ Light' : '🌙 Dark'}</button>
+            <span className="pill">Role: {role || 'Guest'}</span>
             <span className="pill">AI Status: Online</span>
-            <span className="pill">Secure</span>
           </div>
         </header>
         <div className="content-area">

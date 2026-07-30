@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logging import init_logging
-from app.api import health, prediction, summary, analytics, recommendation, admin, history
+from app.api import health, prediction, summary, analytics, recommendation, admin, history, assistant, reports
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.exception_handler import ExceptionMiddleware
 from app.middleware.jwt_auth import JWTAuthMiddleware
@@ -47,8 +47,10 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, prefix=settings.API_PREFIX, tags=["health"])
     app.include_router(prediction.router, prefix=settings.API_PREFIX, tags=["prediction"])
+    app.include_router(assistant.router, prefix=settings.API_PREFIX, tags=["assistant"])
     app.include_router(summary.router, prefix=settings.API_PREFIX, tags=["summary"])
     app.include_router(analytics.router, prefix=settings.API_PREFIX, tags=["analytics"])
+    app.include_router(reports.router, prefix=settings.API_PREFIX, tags=["reports"])
     app.include_router(recommendation.router, prefix=settings.API_PREFIX, tags=["recommendation"])
     app.include_router(admin.router, prefix=settings.API_PREFIX, tags=["admin"])
     app.include_router(history.router, prefix=settings.API_PREFIX, tags=["history"])

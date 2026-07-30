@@ -1,0 +1,62 @@
+Metadata-Version: 2.4
+Name: intelsense-ai-service
+Version: 0.1.0
+Summary: IntelSense AI - FastAPI microservice scaffold
+Author: IntelSense Team
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi<0.100.0,>=0.95.0
+Requires-Dist: uvicorn[standard]<0.25.0,>=0.22.0
+Requires-Dist: pydantic<2.0,>=1.10.0
+Requires-Dist: sqlalchemy<2.0,>=1.4.49
+Requires-Dist: alembic<2.0,>=1.11.0
+Requires-Dist: asyncpg<0.30.0,>=0.28.1
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: redis>=4.5.5
+Requires-Dist: loguru>=0.7.0
+Requires-Dist: httpx==0.24.1
+Requires-Dist: PyJWT>=2.8.0
+Requires-Dist: prometheus-client>=0.17.0
+Requires-Dist: langdetect>=1.0.0
+Requires-Dist: aioredis>=2.0.0
+Requires-Dist: pytest>=7.4.0
+Requires-Dist: pytest-asyncio>=0.22.0
+Provides-Extra: gpu
+Requires-Dist: torch; extra == "gpu"
+
+# IntelSense AI - FastAPI microservice
+
+This service is the AI engine for IntelSense AI. It accepts customer feedback, runs AI analysis, and returns structured intelligence payloads for the backend and dashboard.
+
+## What it provides
+- Sentiment analysis
+- Emotion detection
+- Aspect-based analysis
+- Keyword extraction
+- Topic detection
+- Summary generation
+- Explainability output
+- Recommendation generation
+- Health and analytics endpoints
+
+## Quick start
+1. Copy `.env.example` to `.env`.
+2. Start the stack with Docker:
+   - `docker compose up --build`
+3. Open the API docs:
+   - `http://localhost:8000/api/v1/docs`
+4. Example prediction request:
+   - `POST /api/v1/predict`
+
+## Example payload
+```json
+{
+  "text": "I love this product but support was slow.",
+  "source": "web"
+}
+```
+
+## Notes
+- `USE_DUMMY_MODELS=true` uses built-in lightweight logic for local development.
+- Set it to `false` to try real model loading paths when dependencies are available.
+- Alembic is prepared for future migrations.

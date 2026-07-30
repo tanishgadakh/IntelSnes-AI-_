@@ -12,6 +12,6 @@ def predict_sentiment(text: str):
     if settings.USE_DUMMY_MODELS:
         return dummy_sentiment(text)
     if SentimentModel is None:
-        return dummy_sentiment(text)
+        raise RuntimeError("Sentiment model is unavailable. Install transformers and torch for real model support.")
     model = SentimentModel()
     return model.predict(text)

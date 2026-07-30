@@ -24,10 +24,15 @@ public class JwtService {
     }
 
     public String generateToken(String username) {
+        return generateToken(username, "VIEWER");
+    }
+
+    public String generateToken(String username, String role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
         return Jwts.builder()
                 .subject(username)
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(signingKey, SignatureAlgorithm.HS256)
@@ -49,6 +54,12 @@ public class JwtService {
     public String extractUsername(String token) {
         Claims claims = getClaims(token);
         return claims.getSubject();
+    }
+
+    public String extractRole(String token) {
+        Claims claims = getClaims(token);
+        Object role = claims.get("role");
+        return role != null ? role.toString() : null;
     }
 
     public String getSubject(String token) {

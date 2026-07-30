@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = Field("change-me-local-intelsense-ai-jwt-signing-key-2026", env="JWT_SECRET")
     JWT_ALGORITHM: str = Field("HS256", env="JWT_ALGORITHM")
     MODEL_CACHE_DIR: str = Field("/models", env="MODEL_CACHE_DIR")
-    USE_DUMMY_MODELS: bool = Field(True, env="USE_DUMMY_MODELS")
+    USE_DUMMY_MODELS: bool = Field(False, env="USE_DUMMY_MODELS")
     LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
 
     class Config:

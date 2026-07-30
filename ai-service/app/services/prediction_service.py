@@ -19,6 +19,8 @@ class PredictionService:
         payload = {
             "id": None,
             "input_text": text,
+            "language": result["language"],
+            "confidence": result["confidence"],
             "result": {
                 "sentiment": result["sentiment"],
                 "emotions": result["emotions"],
@@ -28,6 +30,8 @@ class PredictionService:
                 "summary": result["summary"],
                 "explainability": result["explainability"],
                 "recommendations": result["recommendations"],
+                "language": result["language"],
+                "confidence": result["confidence"],
             },
         }
         try:

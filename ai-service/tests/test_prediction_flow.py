@@ -17,4 +17,8 @@ def test_predict_endpoint(client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["input_text"] == "I love this product!"
+    assert data["language"] == "en"
+    assert isinstance(data["confidence"], float)
     assert "result" in data
+    assert data["result"]["language"] == "en"
+    assert data["result"]["confidence"] == data["confidence"]
