@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 
-export default function RegisterPage({ onLogin }) {
+export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,8 +17,9 @@ export default function RegisterPage({ onLogin }) {
       await api.post('/api/auth/register', { username, password });
       setMessage('Account created. You can now sign in.');
       setTimeout(() => navigate('/login'), 900);
-    } catch {
-      setMessage('Registration failed. Check the backend connection.');
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.response?.data?.detail || 'Registration failed. Check the backend connection.';
+      setMessage(message);
     } finally {
       setLoading(false);
     }

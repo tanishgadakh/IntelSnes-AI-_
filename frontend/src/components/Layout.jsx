@@ -15,8 +15,9 @@ const navItems = [
   { to: '/profile', label: 'Profile', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] }
 ];
 
-export default function Layout({ token, role, onLogout, theme, onThemeToggle }) {
+export default function Layout({ token, role, username, onLogout, theme, onThemeToggle }) {
   const navigate = useNavigate();
+  const safeRole = String(role || 'GUEST').toUpperCase();
 
   const handleLogout = () => {
     onLogout();
@@ -34,7 +35,7 @@ export default function Layout({ token, role, onLogout, theme, onThemeToggle }) 
           </div>
         </div>
         <nav>
-          {navItems.filter((item) => item.roles.includes(role)).map((item) => (
+          {navItems.filter((item) => item.roles.includes(safeRole)).map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               {item.label}
             </NavLink>
@@ -46,11 +47,11 @@ export default function Layout({ token, role, onLogout, theme, onThemeToggle }) 
         <header className="topbar">
           <div>
             <h3>Enterprise Intelligence Workspace</h3>
-            <p>{token ? 'Connected to backend' : 'Authenticate to continue'}</p>
+            <p>{token ? `Signed in as ${username || 'user'}` : 'Authenticate to continue'}</p>
           </div>
           <div className="topbar-actions">
             <button className="theme-toggle" onClick={onThemeToggle}>{theme === 'dark' ? '☀️ Light' : '🌙 Dark'}</button>
-            <span className="pill">Role: {role || 'Guest'}</span>
+            <span className="pill">Role: {safeRole}</span>
             <span className="pill">AI Status: Online</span>
           </div>
         </header>

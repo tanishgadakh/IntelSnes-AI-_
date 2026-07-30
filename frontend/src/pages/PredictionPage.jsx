@@ -11,6 +11,21 @@ const steps = [
   'Building recommendations'
 ];
 
+const HISTORY_KEY = 'intelsense-history';
+
+function saveHistoryEntry(result, reviewText) {
+  const previousEntries = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  const nextEntry = {
+    review: reviewText,
+    sentiment: result?.sentiment || null,
+    summary: result?.summary || 'No summary available.',
+    recommendations: result?.recommendations || []
+  };
+
+  const updatedEntries = [nextEntry, ...previousEntries].slice(0, 8);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedEntries));
+}
+
 export default function PredictionPage({ token }) {
   const [text, setText] = useState('The product quality is amazing but delivery was delayed.');
   const [result, setResult] = useState(null);
@@ -28,6 +43,7 @@ export default function PredictionPage({ token }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResult(res.data);
+      saveHistoryEntry(res.data, text);
     } catch {
       setError('Prediction failed. Check that the backend and AI service are running.');
     } finally {

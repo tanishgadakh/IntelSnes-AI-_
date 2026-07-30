@@ -20,6 +20,10 @@ import ModelCenterPage from './pages/ModelCenterPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 
+function normalizeRole(role) {
+  return String(role || '').toUpperCase();
+}
+
 function ProtectedRoute({ token, children }) {
   return token ? children : <Navigate to="/login" replace />;
 }
@@ -27,19 +31,26 @@ function ProtectedRoute({ token, children }) {
 function RoleRoute({ token, allowedRoles, children }) {
   if (!token) return <Navigate to="/login" replace />;
   const payload = parseJwt(token);
-  const role = payload?.role;
-  return allowedRoles.includes(role)
+  const role = normalizeRole(payload?.role || '');
+  const normalizedAllowedRoles = allowedRoles.map(normalizeRole);
+  return normalizedAllowedRoles.includes(role)
     ? children
-    : <Navigate to="/access-denied" state={{ requiredRoles: allowedRoles }} replace />;
+    : <Navigate to="/access-denied" state={{ requiredRoles: normalizedAllowedRoles }} replace />;
 }
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('intelsense-token') || '');
-  const [theme, setTheme] = useState(localStorage.getItem('intelsense-theme') || 'dark');
-  const [role, setRole] = useState(() => {
-    const existingToken = localStorage.getItem('intelsense-token');
-    return parseJwt(existingToken)?.role || '';
+  const [auth, setAuth] = useState(() => {
+    const storedToken = localStorage.getItem('intelsense-token') || '';
+    const storedRole = localStorage.getItem('intelsense-role') || '';
+    const storedUsername = localStorage.getItem('intelsense-username') || '';
+
+    return {
+      token: storedToken,
+      role: normalizeRole(storedRole || parseJwt(storedToken)?.role || ''),
+      username: storedUsername
+    };
   });
+  const [theme, setTheme] = useState(localStorage.getItem('intelsense-theme') || 'dark');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -47,37 +58,45 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('intelsense-token', token);
-      setRole(parseJwt(token)?.role || '');
+    if (auth.token) {
+      localStorage.setItem('intelsense-token', auth.token);
+      localStorage.setItem('intelsense-role', auth.role || '');
+      localStorage.setItem('intelsense-username', auth.username || '');
     } else {
       localStorage.removeItem('intelsense-token');
-      setRole('');
+      localStorage.removeItem('intelsense-role');
+      localStorage.removeItem('intelsense-username');
     }
-  }, [token]);
+  }, [auth]);
 
-  const handleLogout = () => setToken('');
+  const handleLogin = ({ token, role, username }) => {
+    setAuth({ token, role: normalizeRole(role), username });
+  };
+
+  const handleLogout = () => {
+    setAuth({ token: '', role: '', username: '' });
+  };
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage onLogin={setToken} />} />
-        <Route path="/register" element={<RegisterPage onLogin={setToken} />} />
+        <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+        <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route element={<Layout token={token} role={role} onLogout={handleLogout} theme={theme} onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />}>
-          <Route path="/dashboard" element={<ProtectedRoute token={token}><DashboardPage /></ProtectedRoute>} />
-          <Route path="/prediction" element={<RoleRoute token={token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><PredictionPage token={token} /></RoleRoute>} />
-          <Route path="/analytics" element={<ProtectedRoute token={token}><AnalyticsPage /></ProtectedRoute>} />
-          <Route path="/history" element={<ProtectedRoute token={token}><HistoryPage /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute token={token}><ReportsPage /></ProtectedRoute>} />
-          <Route path="/assistant" element={<RoleRoute token={token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><AssistantPage /></RoleRoute>} />
-          <Route path="/notifications" element={<ProtectedRoute token={token}><NotificationsPage /></ProtectedRoute>} />
-          <Route path="/admin" element={<RoleRoute token={token} allowedRoles={[ 'ADMIN' ]}><AdminPage /></RoleRoute>} />
-          <Route path="/monitoring" element={<RoleRoute token={token} allowedRoles={[ 'ADMIN', 'MANAGER' ]}><MonitoringPage /></RoleRoute>} />
-          <Route path="/model-center" element={<RoleRoute token={token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><ModelCenterPage /></RoleRoute>} />
-          <Route path="/settings" element={<ProtectedRoute token={token}><SettingsPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute token={token}><ProfilePage /></ProtectedRoute>} />
+        <Route element={<Layout token={auth.token} role={auth.role} username={auth.username} onLogout={handleLogout} theme={theme} onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />}>
+          <Route path="/dashboard" element={<ProtectedRoute token={auth.token}><DashboardPage user={auth} /></ProtectedRoute>} />
+          <Route path="/prediction" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><PredictionPage token={auth.token} /></RoleRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute token={auth.token}><AnalyticsPage /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute token={auth.token}><HistoryPage /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute token={auth.token}><ReportsPage /></ProtectedRoute>} />
+          <Route path="/assistant" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><AssistantPage /></RoleRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute token={auth.token}><NotificationsPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN' ]}><AdminPage /></RoleRoute>} />
+          <Route path="/monitoring" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN', 'MANAGER' ]}><MonitoringPage /></RoleRoute>} />
+          <Route path="/model-center" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><ModelCenterPage /></RoleRoute>} />
+          <Route path="/settings" element={<ProtectedRoute token={auth.token}><SettingsPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute token={auth.token}><ProfilePage user={auth} /></ProtectedRoute>} />
         </Route>
         <Route path="/access-denied" element={<AccessDeniedPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

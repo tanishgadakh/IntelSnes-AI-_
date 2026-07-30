@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import { parseJwt } from '../utils/jwt';
+
+function normalizeRole(role) {
+  return String(role || '').toUpperCase();
+}
 
 export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('demo');
@@ -17,14 +22,25 @@ export default function LoginPage({ onLogin }) {
     setLoading(true);
     try {
       const res = await api.post('/api/auth/login', { username, password });
-      const token = res.data.token || '';
+      const token = res.data?.token || '';
+      const role = normalizeRole(res.data?.role || parseJwt(token)?.role || 'ANALYST');
+      const authPayload = { token, role, username: res.data?.username || username };
+
       if (rememberMe) {
         localStorage.setItem('intelsense-token', token);
+        localStorage.setItem('intelsense-role', role);
+        localStorage.setItem('intelsense-username', authPayload.username);
+      } else {
+        localStorage.removeItem('intelsense-token');
+        localStorage.removeItem('intelsense-role');
+        localStorage.removeItem('intelsense-username');
       }
-      onLogin(token);
+
+      onLogin(authPayload);
       navigate('/dashboard');
-    } catch {
-      setError('Unable to sign in. Please verify your backend and MySQL are running.');
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.response?.data?.detail || 'Unable to sign in. Please verify your backend and MySQL are running.';
+      setError(message);
     } finally {
       setLoading(false);
     }

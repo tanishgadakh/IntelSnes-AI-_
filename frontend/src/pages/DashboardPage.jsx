@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
 
-export default function DashboardPage() {
+export default function DashboardPage({ user }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchSummary = async () => {
       try {
         const res = await api.get('/api/health');
-        setSummary(res.data);
+        setSummary({ online: true, message: res.data });
       } catch {
-        setSummary({ status: 'backend offline' });
+        setSummary({ online: false, message: 'backend offline' });
       } finally {
         setLoading(false);
       }
@@ -19,17 +20,16 @@ export default function DashboardPage() {
   }, []);
 
   const stats = [
-    { label: 'Total Reviews', value: '21,420', detail: 'Collected this month' },
-    { label: 'Positive Reviews', value: '16,800', detail: '78% of total' },
-    { label: 'Negative Reviews', value: '4,620', detail: '22% of total' },
-    { label: 'Customer Sat.', value: '91%', detail: 'Target: 90%' },
-    { label: 'AI Confidence', value: '95%', detail: 'Model confidence average' }
+    { label: 'Authenticated user', value: user?.username || 'Guest', detail: 'Signed in with backend credentials' },
+    { label: 'Access level', value: user?.role || 'GUEST', detail: 'Permissions are enforced for this session' },
+    { label: 'Backend status', value: summary?.online ? 'Online' : 'Offline', detail: summary?.message || 'Checking API health' },
+    { label: 'Session token', value: user?.token ? 'Active' : 'Missing', detail: user?.token ? 'JWT is present for API calls' : 'Please sign in again' }
   ];
 
   const activity = [
-    'New review batch imported from support portal',
-    'Sentiment drift alert on delivery experience',
-    'Report generation completed for product team'
+    `Live health check: ${summary?.message || 'pending'}`,
+    `Role-based access is active for ${user?.role || 'guest'} users`,
+    'Recent analysis results are stored in the workspace history'
   ];
 
   return (
@@ -37,8 +37,8 @@ export default function DashboardPage() {
       <div className="hero-card dashboard-hero">
         <div>
           <h2>Customer intelligence at a glance</h2>
-          <p>Instantly understand customer sentiment, product feedback, and operational issues with AI-backed analytics.</p>
-          <p className="muted">{loading ? 'Checking backend and MySQL connection...' : `Backend status: ${summary?.status || 'unknown'}`}</p>
+          <p>Live authentication state and backend health now appear directly in the workspace.</p>
+          <p className="muted">{loading ? 'Checking backend and MySQL connection...' : `Backend status: ${summary?.message || 'unknown'}`}</p>
         </div>
         <div className="hero-badge">Live insights</div>
       </div>
@@ -50,22 +50,14 @@ export default function DashboardPage() {
         </div>
       ))}
       <div className="chart-card wide">
-        <h3>Product satisfaction trend</h3>
-        <div className="chart-placeholder">Line chart showing trend for the last 30 days</div>
-      </div>
-      <div className="chart-card">
-        <h3>Sentiment distribution</h3>
-        <div className="chart-placeholder">Positive / neutral / negative</div>
+        <h3>Workspace status</h3>
+        <div className="chart-placeholder">Authentication, permissions, and backend availability are now visible in the UI.</div>
       </div>
       <div className="panel activity-panel">
         <h3>Recent activity</h3>
         <ul>
           {activity.map((item) => <li key={item}>{item}</li>)}
         </ul>
-      </div>
-      <div className="chart-card">
-        <h3>Focus areas</h3>
-        <div className="chart-placeholder">Top issues and actions</div>
       </div>
     </div>
   );

@@ -1,41 +1,43 @@
+import { useEffect, useState } from 'react';
+
 export default function HistoryPage() {
-  const entries = [
-    { review: 'Great experience with delivery.', sentiment: 'Positive', date: 'Today', status: 'Complete' },
-    { review: 'Customer support was slow.', sentiment: 'Negative', date: 'Yesterday', status: 'Action' },
-    { review: 'Product quality is excellent.', sentiment: 'Positive', date: '2 days ago', status: 'Complete' }
-  ];
+  const [entries, setEntries] = useState([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('intelsense-history');
+      setEntries(stored ? JSON.parse(stored) : []);
+    } catch {
+      setEntries([]);
+    }
+  }, []);
 
   return (
     <div className="history-page">
       <div className="hero-card">
-        <h2>Search saved reviews</h2>
-        <p>Filter, sort, and re-run analysis on every stored customer interaction.</p>
-      </div>
-      <div className="panel history-tools">
-        <input placeholder="Search reviews..." />
-        <select>
-          <option>All sentiments</option>
-          <option>Positive</option>
-          <option>Negative</option>
-          <option>Neutral</option>
-        </select>
+        <h2>Saved analysis history</h2>
+        <p>Recent predictions are stored locally from your authenticated sessions.</p>
       </div>
       <div className="panel history-table">
-        <table>
-          <thead>
-            <tr><th>Review</th><th>Sentiment</th><th>Date</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            {entries.map((entry) => (
-              <tr key={entry.review}>
-                <td>{entry.review}</td>
-                <td>{entry.sentiment}</td>
-                <td>{entry.date}</td>
-                <td>{entry.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {entries.length === 0 ? (
+          <p className="muted">No saved analysis yet. Run a prediction to create history.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr><th>Review</th><th>Sentiment</th><th>Summary</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {entries.map((entry, index) => (
+                <tr key={`${entry.review}-${index}`}>
+                  <td>{entry.review}</td>
+                  <td>{entry.sentiment?.label || 'n/a'}</td>
+                  <td>{entry.summary || 'No summary available.'}</td>
+                  <td>Stored</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
