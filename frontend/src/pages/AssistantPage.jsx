@@ -9,7 +9,7 @@ const starterMessages = [
   'Suggest three actions to improve satisfaction.'
 ];
 
-const ALLOWED_ROLES = [ 'ADMIN', 'MANAGER', 'ANALYST' ];
+const ALLOWED_ROLES = [ 'ADMIN', 'MANAGER', 'ANALYST', 'CUSTOMER' ];
 
 export default function AssistantPage({ token }) {
   const [messages, setMessages] = useState([

@@ -47,7 +47,8 @@ export default function PredictionPage({ token }) {
         { text, source: 'web' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const payload = res.data?.result || res.data;
+      const responseData = res.data || {};
+      const payload = responseData.result || responseData;
       setResult(payload);
       saveHistoryEntry(payload, text);
     } catch {

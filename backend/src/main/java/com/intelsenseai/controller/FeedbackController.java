@@ -53,6 +53,7 @@ public class FeedbackController {
         responseBody.put("language", result.getOrDefault("language", null));
         responseBody.put("confidence", result.getOrDefault("confidence", null));
         responseBody.put("sentiment", result.getOrDefault("sentiment", Map.of()));
+        responseBody.put("result", result);
         responseBody.put("emotions", result.getOrDefault("emotions", Map.of()));
         responseBody.put("aspects", result.getOrDefault("aspects", List.of()));
         responseBody.put("keywords", result.getOrDefault("keywords", List.of()));

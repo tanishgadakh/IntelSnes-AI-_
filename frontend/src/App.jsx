@@ -168,7 +168,7 @@ export default function App() {
           <Route path="/analytics" element={<ProtectedRoute token={auth.token}><AnalyticsPage /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute token={auth.token}><HistoryPage /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute token={auth.token}><ReportsPage /></ProtectedRoute>} />
-          <Route path="/assistant" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><AssistantPage token={auth.token} /></RoleRoute>} />
+          <Route path="/assistant" element={<ProtectedRoute token={auth.token}><AssistantPage token={auth.token} /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute token={auth.token}><NotificationsPage /></ProtectedRoute>} />
           <Route path="/admin" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN' ]}><AdminPage /></RoleRoute>} />
           <Route path="/monitoring" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN', 'MANAGER' ]}><MonitoringPage /></RoleRoute>} />

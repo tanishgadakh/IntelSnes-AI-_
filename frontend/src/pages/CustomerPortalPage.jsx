@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 
 const sectionMeta = {
@@ -66,6 +66,7 @@ const supportItems = [
 ];
 
 export default function CustomerPortalPage({ section = 'dashboard', user }) {
+  const navigate = useNavigate();
   const meta = sectionMeta[section] || sectionMeta.dashboard;
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
