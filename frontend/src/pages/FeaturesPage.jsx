@@ -202,7 +202,7 @@ export default function FeaturesPage() {
               to help teams improve service quality, growth, and customer experience at scale.
             </p>
             <div className="hero-buttons">
-              <button type="button" className="button-link">Try Interactive Demo</button>
+              <Link className="button-link" to="/dashboard-preview">Try Interactive Demo</Link>
               <Link className="ghost-btn" to="/register">Explore Dashboard</Link>
             </div>
           </div>
@@ -467,27 +467,27 @@ export default function FeaturesPage() {
         <div className="footer-grid">
           <div>
             <h4>IntelSense AI</h4>
-            <a href="#technology">About</a>
-            <a href="#solutions">Use Cases</a>
-            <a href="#">Contact</a>
+            <Link to="/about">About</Link>
+            <Link to="/solutions">Use Cases</Link>
+            <Link to="/contact">Contact</Link>
           </div>
           <div>
             <h4>Company</h4>
-            <a href="#technology">Features</a>
-            <a href="#technology">AI Technology</a>
-            <a href="#solutions">Solutions</a>
+            <Link to="/features">Features</Link>
+            <Link to="/ai-technology">AI Technology</Link>
+            <Link to="/solutions">Solutions</Link>
           </div>
           <div>
             <h4>Resources</h4>
-            <a href="#">Documentation</a>
-            <a href="#">API</a>
-            <a href="#">GitHub</a>
+            <Link to="/documentation">Documentation</Link>
+            <Link to="/documentation">API</Link>
+            <a href="https://github.com/tanishgadakhpatil-art/IntelSense" target="_blank" rel="noreferrer">GitHub</a>
           </div>
           <div>
             <h4>Legal</h4>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">LinkedIn</a>
+            <Link to="/about">Privacy</Link>
+            <Link to="/about">Terms</Link>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
           </div>
         </div>
         <p className="footer-copy">© 2026 IntelSense AI</p>

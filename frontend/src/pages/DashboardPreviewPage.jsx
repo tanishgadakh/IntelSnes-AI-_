@@ -492,19 +492,19 @@ function DashboardPreviewPage() {
             <h4>Explore</h4>
             <a href="/login">Login</a>
             <a href="/register">Register</a>
-            <a href="#">Documentation</a>
+            <Link to="/documentation">Documentation</Link>
           </div>
           <div>
             <h4>Resources</h4>
-            <a href="#">API</a>
-            <a href="#">Reports</a>
-            <a href="#">Security</a>
+            <Link to="/documentation">API</Link>
+            <Link to="/reports">Reports</Link>
+            <Link to="/enterprise">Security</Link>
           </div>
           <div>
             <h4>Legal</h4>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Support</a>
+            <Link to="/about">Privacy</Link>
+            <Link to="/about">Terms</Link>
+            <Link to="/contact">Support</Link>
           </div>
         </div>
         <p className="footer-copy">© 2026 IntelSense AI</p>

@@ -190,4 +190,94 @@ public class PublicLandingService {
                 new DeploymentOptionResponse("Cloud Deployment", "AWS, Azure, Google Cloud", new String[]{"Enterprise-grade scale", "Global availability", "Production ready"})
         );
     }
+
+    public Map<String, Object> getDocumentationMeta() {
+        return Map.of(
+                "title", "IntelSense AI Documentation",
+                "description", "Everything you need to learn, develop, deploy, and manage IntelSense AI.",
+                "version", "v3.0"
+        );
+    }
+
+    public List<Map<String, Object>> getApiReference() {
+        return List.of(
+                Map.of(
+                        "name", "Authentication",
+                        "method", "POST",
+                        "endpoint", "/api/auth/login",
+                        "description", "Authenticate users and receive an access token.",
+                        "headers", List.of("Content-Type: application/json"),
+                        "body", "{\"email\":\"demo@intelsense.ai\",\"password\":\"demo123\"}",
+                        "response", "{\"token\":\"...\",\"role\":\"ANALYST\"}"
+                ),
+                Map.of(
+                        "name", "Prediction",
+                        "method", "POST",
+                        "endpoint", "/api/predict",
+                        "description", "Submit feedback text for sentiment and AI analysis.",
+                        "headers", List.of("Authorization: Bearer <token>"),
+                        "body", "{\"text\":\"Great product but delivery was slow\"}",
+                        "response", "{\"sentiment\":\"neutral\",\"confidence\":0.96}"
+                ),
+                Map.of(
+                        "name", "Reports",
+                        "method", "GET",
+                        "endpoint", "/api/reports",
+                        "description", "Retrieve summary reports and analytics snapshots.",
+                        "headers", List.of("Authorization: Bearer <token>"),
+                        "body", "None",
+                        "response", "[{\"id\":1,\"summary\":\"Positive trend\"}]"
+                )
+        );
+    }
+
+    public Map<String, Object> getVersionInfo() {
+        return Map.of(
+                "frontend", "1.0.0",
+                "backend", "2.1.0",
+                "aiService", "3.0.0"
+        );
+    }
+
+    public Map<String, Object> getSolutionsData() {
+        return Map.of(
+                "industries", List.of(
+                        Map.of(
+                                "name", "Retail",
+                                "challenge", "Product reviews, returns, and delivery experience need faster interpretation.",
+                                "workflow", List.of("Analyze reviews", "Find complaint themes", "Track product sentiment", "Improve loyalty"),
+                                "metrics", List.of("32% fewer complaints", "8x faster insight"),
+                                "highlight", "Retail teams use IntelSense AI to identify product issues and improve customer experience."
+                        ),
+                        Map.of(
+                                "name", "Healthcare",
+                                "challenge", "Patient feedback and service experience need a dependable understanding of quality signals.",
+                                "workflow", List.of("Monitor patient feedback", "Uncover service gaps", "Improve care satisfaction", "Shape operations"),
+                                "metrics", List.of("25% better perception", "Real-time patient insights"),
+                                "highlight", "Hospitals use the platform to turn feedback into service improvements and care strategy."
+                        )
+                ),
+                "challenges", List.of(
+                        Map.of(
+                                "icon", "😓",
+                                "title", "Manual Feedback Analysis",
+                                "description", "Thousands of customer reviews cannot be processed by hand without missing important signals."
+                        ),
+                        Map.of(
+                                "icon", "📉",
+                                "title", "Poor Customer Satisfaction",
+                                "description", "Businesses struggle to pinpoint the causes behind churn, complaints, and declining loyalty."
+                        )
+                )
+        );
+    }
+
+    public Map<String, Object> getBusinessMetrics() {
+        return Map.of(
+                "manualWorkReduction", 80,
+                "decisionSpeed", 5,
+                "satisfactionLift", 40,
+                "reportGeneration", 60
+        );
+    }
 }

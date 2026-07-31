@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -89,5 +90,30 @@ public class PublicController {
     @GetMapping("/deployment-options")
     public ResponseEntity<List<DeploymentOptionResponse>> getDeploymentOptions() {
         return ResponseEntity.ok(publicLandingService.getDeploymentOptions());
+    }
+
+    @GetMapping("/docs")
+    public ResponseEntity<Map<String, Object>> getDocsMeta() {
+        return ResponseEntity.ok(publicLandingService.getDocumentationMeta());
+    }
+
+    @GetMapping("/api-reference")
+    public ResponseEntity<List<Map<String, Object>>> getApiReference() {
+        return ResponseEntity.ok(publicLandingService.getApiReference());
+    }
+
+    @GetMapping("/version-info")
+    public ResponseEntity<Map<String, Object>> getVersionInfo() {
+        return ResponseEntity.ok(publicLandingService.getVersionInfo());
+    }
+
+    @GetMapping("/solutions")
+    public ResponseEntity<Map<String, Object>> getSolutionsData() {
+        return ResponseEntity.ok(publicLandingService.getSolutionsData());
+    }
+
+    @GetMapping("/business-metrics")
+    public ResponseEntity<Map<String, Object>> getBusinessMetrics() {
+        return ResponseEntity.ok(publicLandingService.getBusinessMetrics());
     }
 }

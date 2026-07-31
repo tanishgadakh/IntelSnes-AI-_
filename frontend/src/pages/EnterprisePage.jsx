@@ -11,19 +11,6 @@ const enterpriseReasons = [
   { icon: '🛡️', title: 'High Availability', description: 'Designed for reliable service, fast recovery, and resilient operational continuity.' }
 ];
 
-const industries = [
-  { name: 'Retail', description: 'Customer reviews, product ratings, delivery feedback, and shopping experience insights.', useCases: ['Customer Reviews', 'Product Ratings', 'Delivery Feedback', 'Shopping Experience'] },
-  { name: 'Healthcare', description: 'Patient sentiment, care quality, support experience, and operational improvements.', useCases: ['Patient Feedback', 'Care Quality', 'Support Experience', 'Operations'] },
-  { name: 'Education', description: 'Learner sentiment, service quality, experience monitoring, and satisfaction trends.', useCases: ['Student Experience', 'Course Feedback', 'Support Quality', 'Retention'] },
-  { name: 'Finance', description: 'Trust, service quality, onboarding friction, and customer sentiment benchmarks.', useCases: ['Service Quality', 'Trust Signals', 'Client Feedback', 'Risk Monitoring'] },
-  { name: 'Insurance', description: 'Claims sentiment, service interactions, satisfaction monitoring, and churn prevention.', useCases: ['Claims Experience', 'Policy Feedback', 'Support Quality', 'Risk Forecasting'] },
-  { name: 'Manufacturing', description: 'Field service quality, product reliability, and customer support sentiment analysis.', useCases: ['Product Quality', 'Field Support', 'Operations', 'Reliability'] },
-  { name: 'Hospitality', description: 'Guest satisfaction, service sentiment, delivery quality, and operational insights.', useCases: ['Guest Reviews', 'Service Quality', 'Amenities', 'Retention'] },
-  { name: 'Government', description: 'Service quality, satisfaction monitoring, and public support sentiment intelligence.', useCases: ['Citizen Experience', 'Service Delivery', 'Public Sentiment', 'Trust'] },
-  { name: 'E-Commerce', description: 'Checkout sentiment, support quality, product issues, and buyer experience insights.', useCases: ['Checkout', 'Shipping', 'Support', 'Product Quality'] },
-  { name: 'Telecommunications', description: 'Customer churn signals, support sentiment, service quality, and retention analytics.', useCases: ['Service Quality', 'Churn Risks', 'Support', 'Network Experience'] }
-];
-
 const businessBenefits = [
   { value: '80%', label: 'Reduction in Manual Analysis' },
   { value: '5×', label: 'Faster Business Decisions' },
@@ -52,15 +39,7 @@ const securityDomains = [
 ];
 
 const scalabilitySteps = ['100 Users', '1,000 Users', '10,000 Users', '100,000 Users', '1 Million Reviews'];
-
 const integrations = ['React', 'Spring Boot', 'FastAPI', 'MySQL', 'Python', 'Docker', 'AWS', 'Azure', 'GitHub', 'REST API'];
-
-const deploymentModes = [
-  { name: 'Local Deployment', details: 'Windows, Linux, Mac', features: ['Desktop friendly', 'Controlled demo setup', 'Private testing'] },
-  { name: 'Docker Deployment', details: 'Docker Compose, Containers, Microservices', features: ['Scalable containers', 'Easy orchestration', 'Fast deployment'] },
-  { name: 'Cloud Deployment', details: 'AWS, Azure, Google Cloud', features: ['Enterprise-grade scale', 'Global availability', 'Production ready'] }
-];
-
 const supportItems = ['24×7 Support', 'Technical Documentation', 'Training', 'Dedicated Deployment', 'Software Updates', 'Priority Assistance'];
 
 const defaultMetrics = {
@@ -88,6 +67,8 @@ function EnterprisePage() {
   const [deploymentOptions, setDeploymentOptions] = useState(defaultDeployments);
   const [selectedIndustry, setSelectedIndustry] = useState('Retail');
   const [activeLayer, setActiveLayer] = useState(architectureLayers[0].name);
+  const [estimatedUsers, setEstimatedUsers] = useState(5000);
+  const [estimatedReviews, setEstimatedReviews] = useState(150000);
 
   useEffect(() => {
     const fetchPublicData = async () => {
@@ -119,6 +100,30 @@ function EnterprisePage() {
     [activeLayer]
   );
 
+  const recommendation = useMemo(() => {
+    if (estimatedUsers > 20000 || estimatedReviews > 750000) {
+      return {
+        mode: 'Cloud Deployment',
+        reason: 'Large-scale enterprise workloads benefit from elastic infrastructure, global availability, and managed operations.',
+        features: ['Auto-scaling', 'High availability', 'Multi-region resilience']
+      };
+    }
+
+    if (estimatedUsers > 2500 || estimatedReviews > 150000) {
+      return {
+        mode: 'Docker Deployment',
+        reason: 'Mid-sized teams usually need containerized orchestration for reliable growth without overcommitting to full cloud scale.',
+        features: ['Containerized services', 'Fast deployment cycles', 'Operational flexibility']
+      };
+    }
+
+    return {
+      mode: 'Local Deployment',
+      reason: 'Smaller pilot teams can move quickly with a controlled deployment that keeps governance simple and costs predictable.',
+      features: ['Fast setup', 'Private testing', 'Low operational overhead']
+    };
+  }, [estimatedUsers, estimatedReviews]);
+
   return (
     <div className="enterprise-page">
       <header className="landing-header features-header">
@@ -135,6 +140,7 @@ function EnterprisePage() {
           <Link to="/features">Features</Link>
           <Link to="/ai-technology">AI Technology</Link>
           <Link to="/dashboard-preview">Dashboard</Link>
+          <Link to="/documentation">Docs</Link>
         </nav>
 
         <div className="landing-actions">
@@ -356,6 +362,54 @@ function EnterprisePage() {
 
         <section className="features-section">
           <div className="section-heading">
+            <p className="section-label">Deployment Estimator</p>
+            <h3>Match your expected scale to the right enterprise architecture</h3>
+          </div>
+
+          <div className="estimator-grid">
+            <div className="estimator-card glass-card">
+              <label className="estimator-control">
+                <span>Expected Active Users</span>
+                <input
+                  type="range"
+                  min="50"
+                  max="50000"
+                  step="50"
+                  value={estimatedUsers}
+                  onChange={(event) => setEstimatedUsers(Number(event.target.value))}
+                />
+                <strong>{estimatedUsers.toLocaleString()} users</strong>
+              </label>
+
+              <label className="estimator-control">
+                <span>Expected Reviews / Month</span>
+                <input
+                  type="range"
+                  min="1000"
+                  max="2000000"
+                  step="1000"
+                  value={estimatedReviews}
+                  onChange={(event) => setEstimatedReviews(Number(event.target.value))}
+                />
+                <strong>{estimatedReviews.toLocaleString()} reviews</strong>
+              </label>
+            </div>
+
+            <div className="deployment-recommendation glass-card">
+              <p className="section-label">Recommended Architecture</p>
+              <h4>{recommendation.mode}</h4>
+              <p>{recommendation.reason}</p>
+              <ul>
+                {recommendation.features.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section className="features-section">
+          <div className="section-heading">
             <p className="section-label">Enterprise Support</p>
             <h3>Support that keeps your business moving</h3>
           </div>
@@ -382,7 +436,7 @@ function EnterprisePage() {
             </div>
             <div className="success-card glass-card">
               <span>AI Accuracy</span>
-              <strong>99.2%</strong>
+              <strong>{metrics.aiAccuracy}%</strong>
             </div>
             <div className="success-card glass-card">
               <span>Prediction Time</span>
@@ -420,15 +474,15 @@ function EnterprisePage() {
           </div>
           <div>
             <h4>Enterprise</h4>
-            <a href="#">Security</a>
-            <a href="#">Deployment</a>
-            <a href="#">Support</a>
+            <Link to="/enterprise">Security</Link>
+            <Link to="/documentation">Deployment</Link>
+            <Link to="/contact">Support</Link>
           </div>
           <div>
             <h4>Company</h4>
             <a href="mailto:sales@intelsense.ai">Sales</a>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
+            <Link to="/about">Privacy</Link>
+            <Link to="/about">Terms</Link>
           </div>
         </div>
         <p className="footer-copy">© 2026 IntelSense AI</p>

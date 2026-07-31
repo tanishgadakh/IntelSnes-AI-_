@@ -166,12 +166,12 @@ export default function LandingPage() {
         </div>
 
         <nav className="landing-nav-links" aria-label="Main navigation">
-          <a href="#home">Home</a>
-          <a href="#features">Features</a>
-          <a href="#technology">AI Technology</a>
-          <a href="#dashboard">Dashboard</a>
-          <a href="#solutions">Solutions</a>
-          <a href="#documentation">Docs</a>
+          <Link to="/">Home</Link>
+          <Link to="/features">Features</Link>
+          <Link to="/ai-technology">AI Technology</Link>
+          <Link to="/dashboard-preview">Dashboard</Link>
+          <Link to="/enterprise">Enterprise</Link>
+          <Link to="/documentation">Docs</Link>
         </nav>
 
         <div className="landing-actions">
@@ -327,7 +327,7 @@ export default function LandingPage() {
                 <div className="feature-icon">{feature.icon}</div>
                 <h4>{feature.title}</h4>
                 <p>{feature.description}</p>
-                <button type="button" className="feature-link">Learn More →</button>
+                <Link to="/features" className="feature-link">Learn More →</Link>
               </article>
             ))}
           </div>
@@ -370,7 +370,7 @@ export default function LandingPage() {
                 <h4>{card.title}</h4>
                 <p>{card.summary}</p>
                 <div className="dashboard-card-actions">
-                  <button type="button" className="small-button">Preview →</button>
+                  <Link to="/dashboard-preview" className="small-button">Preview →</Link>
                 </div>
               </div>
             ))}
@@ -402,7 +402,7 @@ export default function LandingPage() {
               <article key={item.title} className="solution-card glass-card">
                 <h4>{item.title}</h4>
                 <p>{item.description}</p>
-                <button type="button" className="feature-link">How IntelSense AI helps {item.title} →</button>
+                <Link to="/solutions" className="feature-link">How IntelSense AI helps {item.title} →</Link>
               </article>
             ))}
           </div>
@@ -477,7 +477,7 @@ export default function LandingPage() {
                     <li key={feature}>{feature}</li>
                   ))}
                 </ul>
-                <button type="button" className="button-link pricing-button">Choose Plan</button>
+                <Link to="/pricing" className="button-link pricing-button">Choose Plan</Link>
               </div>
             ))}
           </div>
@@ -510,7 +510,7 @@ export default function LandingPage() {
             <div className="hero-buttons cta-buttons">
               <Link className="button-link" to="/register">Register</Link>
               <Link className="ghost-btn" to="/login">Login</Link>
-              <a className="ghost-btn" href="#documentation">Book Demo</a>
+              <Link className="ghost-btn" to="/contact">Book Demo</Link>
             </div>
           </div>
         </section>
@@ -520,27 +520,27 @@ export default function LandingPage() {
         <div className="footer-grid">
           <div>
             <h4>IntelSense AI</h4>
-            <a href="#features">About</a>
-            <a href="#solutions">Careers</a>
-            <a href="#">Contact</a>
+            <Link to="/about">About</Link>
+            <Link to="/solutions">Solutions</Link>
+            <Link to="/contact">Contact</Link>
           </div>
           <div>
             <h4>Company</h4>
-            <a href="#features">Features</a>
-            <a href="#technology">AI Technology</a>
-            <a href="#dashboard">Dashboard</a>
+            <Link to="/features">Features</Link>
+            <Link to="/ai-technology">AI Technology</Link>
+            <Link to="/dashboard-preview">Dashboard</Link>
           </div>
           <div>
             <h4>Resources</h4>
-            <a href="#documentation">Documentation</a>
-            <a href="#">API</a>
-            <a href="#">GitHub</a>
+            <Link to="/documentation">Documentation</Link>
+            <Link to="/documentation">API</Link>
+            <a href="https://github.com/tanishgadakhpatil-art/IntelSense" target="_blank" rel="noreferrer">GitHub</a>
           </div>
           <div>
             <h4>Legal</h4>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">LinkedIn</a>
+            <Link to="/about">Privacy</Link>
+            <Link to="/about">Terms</Link>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
           </div>
         </div>
         <p className="footer-copy">© 2026 IntelSense AI</p>

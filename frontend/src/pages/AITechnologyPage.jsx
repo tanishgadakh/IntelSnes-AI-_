@@ -388,19 +388,19 @@ export default function AITechnologyPage() {
             <h4>Company</h4>
             <a href="/features">Features</a>
             <a href="/">Home</a>
-            <a href="#">Documentation</a>
+            <Link to="/documentation">Documentation</Link>
           </div>
           <div>
             <h4>Resources</h4>
-            <a href="#">API</a>
-            <a href="#">Security</a>
-            <a href="#">GitHub</a>
+            <Link to="/documentation">API</Link>
+            <Link to="/enterprise">Security</Link>
+            <a href="https://github.com/tanishgadakhpatil-art/IntelSense" target="_blank" rel="noreferrer">GitHub</a>
           </div>
           <div>
             <h4>Legal</h4>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">LinkedIn</a>
+            <Link to="/about">Privacy</Link>
+            <Link to="/about">Terms</Link>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
           </div>
         </div>
         <p className="footer-copy">© 2026 IntelSense AI</p>
