@@ -32,6 +32,9 @@ public class AuthService {
 
     public AuthResponse login(AuthRequest request) {
         Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
+        if (userOpt.isEmpty() && request.getUsername() != null && request.getUsername().contains("@")) {
+            userOpt = userRepository.findByEmail(request.getUsername());
+        }
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("Invalid username or password");
         }

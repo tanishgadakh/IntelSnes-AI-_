@@ -181,9 +181,9 @@ export default function FeaturesPage() {
         <nav className="landing-nav-links" aria-label="Main navigation">
           <Link to="/">Home</Link>
           <Link to="/features">Features</Link>
-          <a href="#technology">Technology</a>
-          <a href="#solutions">Use Cases</a>
-          <a href="#pricing">Pricing</a>
+          <Link to="/ai-technology">Technology</Link>
+          <Link to="/solutions">Use Cases</Link>
+          <Link to="/pricing">Pricing</Link>
         </nav>
 
         <div className="landing-actions">

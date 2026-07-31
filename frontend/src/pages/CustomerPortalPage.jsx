@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/client';
 
 const sectionMeta = {
   dashboard: {
@@ -57,12 +59,6 @@ const quickActions = [
   { label: 'View Reports', to: '/reports' }
 ];
 
-const recentPredictions = [
-  { id: 'A-104', summary: 'Positive sentiment with strong product praise', score: '96%' },
-  { id: 'A-103', summary: 'Service frustration around delayed support', score: '88%' },
-  { id: 'A-102', summary: 'Neutral review with mixed delivery experience', score: '81%' }
-];
-
 const supportItems = [
   { title: 'FAQs', detail: 'Find answers for product, billing, and account usage.' },
   { title: 'Documentation', detail: 'Read the customer guide and AI workflow overview.' },
@@ -71,6 +67,97 @@ const supportItems = [
 
 export default function CustomerPortalPage({ section = 'dashboard', user }) {
   const meta = sectionMeta[section] || sectionMeta.dashboard;
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [feedbackForm, setFeedbackForm] = useState({ title: '', category: '', details: '' });
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('intelsense-token') || '';
+        const resp = await api.get('/api/feedback', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!cancelled) {
+          const payload = Array.isArray(resp.data) ? resp.data : [];
+          setHistory(payload);
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const stored = localStorage.getItem('intelsense-history');
+          try {
+            setHistory(stored ? JSON.parse(stored) : []);
+          } catch {
+            setHistory([]);
+          }
+          setError('Live history is temporarily unavailable; showing the latest stored activity.');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const recentPredictions = useMemo(() => history.slice(0, 3).map((item) => ({
+    id: item.id || 'n/a',
+    summary: item.aiResult || item.text || 'No summary yet',
+    score: item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Pending'
+  })), [history]);
+
+  const overviewStats = useMemo(() => [
+    { label: 'Stored analyses', value: history.length.toString(), detail: 'Persisted feedback records' },
+    { label: 'Latest activity', value: history[0]?.createdAt ? new Date(history[0].createdAt).toLocaleDateString() : 'No data', detail: 'Most recent submission' },
+    { label: 'Status', value: error ? 'Sync warning' : 'Live', detail: error || 'Connected to API' }
+  ], [error, history]);
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!feedbackForm.details.trim()) {
+      setFeedbackMessage('Please add feedback details before submitting.');
+      return;
+    }
+
+    setFeedbackSubmitting(true);
+    setFeedbackMessage('');
+
+    try {
+      const token = localStorage.getItem('intelsense-token') || '';
+      const payload = {
+        text: `${feedbackForm.title ? `${feedbackForm.title}: ` : ''}${feedbackForm.details}`,
+        source: feedbackForm.category || 'customer-portal'
+      };
+      const resp = await api.post('/api/feedback', payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const nextItem = {
+        id: resp.data?.id || Date.now(),
+        text: resp.data?.text || payload.text,
+        source: resp.data?.source || payload.source,
+        aiResult: resp.data?.aiResult || 'Processed',
+        createdBy: resp.data?.createdBy || user?.username || 'customer',
+        createdAt: resp.data?.createdAt || new Date().toISOString()
+      };
+      setHistory((prev) => [nextItem, ...prev]);
+      setFeedbackForm({ title: '', category: '', details: '' });
+      setFeedbackMessage('Feedback submitted successfully.');
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.response?.data?.detail || 'Unable to submit feedback right now.';
+      setFeedbackMessage(message);
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
 
   return (
     <div className="customer-portal-page">
@@ -98,32 +185,34 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
           </section>
 
           <div className="customer-stats-grid">
-            <div className="glass-card customer-stat-card">
-              <span>Remaining predictions</span>
-              <strong>1,240</strong>
-            </div>
-            <div className="glass-card customer-stat-card">
-              <span>Monthly usage</span>
-              <strong>78%</strong>
-            </div>
-            <div className="glass-card customer-stat-card">
-              <span>Positive insights</span>
-              <strong>94%</strong>
-            </div>
+            {overviewStats.map((stat) => (
+              <div key={stat.label} className="glass-card customer-stat-card">
+                <span>{stat.label}</span>
+                <strong>{stat.value}</strong>
+                <small>{stat.detail}</small>
+              </div>
+            ))}
           </div>
 
           <div className="customer-panels">
             <div className="glass-card customer-panel-card">
               <h4>Recent predictions</h4>
-              <ul>
-                {recentPredictions.map((item) => (
-                  <li key={item.id}>
-                    <strong>{item.id}</strong>
-                    <span>{item.summary}</span>
-                    <em>{item.score}</em>
-                  </li>
-                ))}
-              </ul>
+              {loading ? (
+                <p className="customer-portal-subtitle">Loading your latest predictions…</p>
+              ) : (
+                <ul>
+                  {recentPredictions.length === 0 ? (
+                    <li><strong>No data yet</strong><span>Submit feedback to populate this panel.</span></li>
+                  ) : recentPredictions.map((item) => (
+                    <li key={item.id}>
+                      <strong>{item.id}</strong>
+                      <span>{item.summary}</span>
+                      <em>{item.score}</em>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {error && <p className="customer-portal-subtitle">{error}</p>}
             </div>
             <div className="glass-card customer-panel-card">
               <h4>Notifications</h4>
@@ -162,25 +251,26 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
       )}
 
       {section === 'submit-feedback' && (
-        <div className="glass-card customer-panel-card">
+        <form onSubmit={handleFeedbackSubmit} className="glass-card customer-panel-card">
           <h4>Submit Feedback</h4>
           <label>
             <span>Feedback title</span>
-            <input type="text" placeholder="Share your experience" />
+            <input type="text" value={feedbackForm.title} onChange={(e) => setFeedbackForm((prev) => ({ ...prev, title: e.target.value }))} placeholder="Share your experience" />
           </label>
           <label>
             <span>Category</span>
-            <input type="text" placeholder="Product, support, billing" />
+            <input type="text" value={feedbackForm.category} onChange={(e) => setFeedbackForm((prev) => ({ ...prev, category: e.target.value }))} placeholder="Product, support, billing" />
           </label>
           <label>
             <span>Details</span>
-            <textarea placeholder="Describe the issue or praise you want to send for analysis." />
+            <textarea value={feedbackForm.details} onChange={(e) => setFeedbackForm((prev) => ({ ...prev, details: e.target.value }))} placeholder="Describe the issue or praise you want to send for analysis." />
           </label>
           <div className="customer-actions">
-            <button type="button" className="button-link">Save Feedback</button>
+            <button type="submit" className="button-link" disabled={feedbackSubmitting}>{feedbackSubmitting ? 'Submitting…' : 'Save Feedback'}</button>
             <button type="button" className="ghost-btn">Attach File</button>
           </div>
-        </div>
+          {feedbackMessage && <p className="customer-portal-subtitle">{feedbackMessage}</p>}
+        </form>
       )}
 
       {section === 'analytics' && (

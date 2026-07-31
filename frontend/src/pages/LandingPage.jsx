@@ -477,7 +477,7 @@ export default function LandingPage() {
                     <li key={feature}>{feature}</li>
                   ))}
                 </ul>
-                <Link to="/pricing" className="button-link pricing-button">Choose Plan</Link>
+                <Link to="/pricing" className="button-link pricing-button">View Pricing</Link>
               </div>
             ))}
           </div>

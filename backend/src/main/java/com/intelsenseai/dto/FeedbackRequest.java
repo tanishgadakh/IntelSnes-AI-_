@@ -1,6 +1,9 @@
 package com.intelsenseai.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class FeedbackRequest {
+    @NotBlank(message = "Feedback text is required")
     private String text;
     private String source;
 

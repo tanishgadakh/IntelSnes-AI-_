@@ -21,7 +21,12 @@ public class FeedbackService {
     }
 
     public Feedback submitFeedback(String text, String source) {
-        Map<String, Object> aiResponse = aiClient.predict(text, source);
+        Map<String, Object> aiResponse;
+        try {
+            aiResponse = aiClient.predict(text, source);
+        } catch (Exception ex) {
+            aiResponse = Map.of("status", "fallback", "message", "AI service unavailable");
+        }
         Feedback feedback = new Feedback();
         feedback.setText(text);
         feedback.setSource(source);

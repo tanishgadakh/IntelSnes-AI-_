@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import api, { API_BASE_URL } from '../api/client';
+import { useEffect, useMemo, useState } from 'react';
+import api from '../api/client';
 
 const HISTORY_KEY = 'intelsense-history';
 
@@ -20,6 +20,38 @@ function toCSV(rows) {
 
 export default function ReportsPage() {
   const [message, setMessage] = useState('');
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const token = localStorage.getItem('intelsense-token') || '';
+        const resp = await api.get('/api/feedback', { headers: { Authorization: `Bearer ${token}` } });
+        setHistory(Array.isArray(resp.data) ? resp.data : []);
+        setError('');
+      } catch {
+        const stored = localStorage.getItem(HISTORY_KEY);
+        try {
+          setHistory(stored ? JSON.parse(stored) : []);
+        } catch {
+          setHistory([]);
+        }
+        setError('Live export data is unavailable; using the latest stored history.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
+  const summaryCards = useMemo(() => [
+    { label: 'PDF', value: history.length > 0 ? 'Ready' : 'Pending' },
+    { label: 'CSV', value: history.length > 0 ? 'Ready' : 'Pending' },
+    { label: 'Dashboard pack', value: history.length > 0 ? 'Ready' : 'Pending' }
+  ], [history.length]);
 
   const exportCsv = async () => {
     try {
@@ -80,16 +112,21 @@ export default function ReportsPage() {
         <button className="primary-btn">Generate report</button>
         <button className="primary-btn" onClick={exportCsv} style={{ marginLeft: 12 }}>Export CSV (history)</button>
         <div className="report-metrics">
-          <div className="metric-card"><p>PDF</p><h3>Ready</h3></div>
-          <div className="metric-card"><p>CSV</p><h3>Ready</h3></div>
-          <div className="metric-card"><p>Dashboard pack</p><h3>Ready</h3></div>
+          {summaryCards.map((card) => (
+            <div key={card.label} className="metric-card"><p>{card.label}</p><h3>{card.value}</h3></div>
+          ))}
         </div>
       </div>
       <div className="panel report-preview">
         <h3>Last generated report</h3>
-        <p>Customer satisfaction trend report • Generated recently</p>
+        {loading ? <p>Loading report data…</p> : (
+          <>
+            <p>{history.length > 0 ? `Customer satisfaction trend report • ${history.length} stored records available` : 'No saved predictions yet. Run an analysis to generate a report.'}</p>
+            {error && <p className="message">{error}</p>}
+            {message && <p className="message">{message}</p>}
+          </>
+        )}
         <button className="ghost-btn">Download report</button>
-        {message && <p className="message">{message}</p>}
       </div>
     </div>
   );

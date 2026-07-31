@@ -5,6 +5,8 @@ import com.intelsenseai.dto.AuthResponse;
 import com.intelsenseai.dto.RegistrationRequest;
 import com.intelsenseai.dto.UserResponse;
 import com.intelsenseai.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +21,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody RegistrationRequest request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegistrationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 }
