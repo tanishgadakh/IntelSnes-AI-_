@@ -3,6 +3,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { parseJwt } from './utils/jwt';
 import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
+import FeaturesPage from './pages/FeaturesPage';
+import AITechnologyPage from './pages/AITechnologyPage';
+import DashboardPreviewPage from './pages/DashboardPreviewPage';
+import EnterprisePage from './pages/EnterprisePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -95,6 +99,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/ai-technology" element={<AITechnologyPage />} />
+        <Route path="/dashboard-preview" element={<DashboardPreviewPage />} />
+        <Route path="/enterprise" element={<EnterprisePage />} />
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
