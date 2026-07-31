@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/auth/**", "/api/health").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/feedback").hasAnyRole("ADMIN", "MANAGER", "ANALYST")
                 .requestMatchers("/api/assistant/**").hasAnyRole("ADMIN", "MANAGER", "ANALYST")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtService), org.springframework.security.web.access.intercept.AuthorizationFilter.class);

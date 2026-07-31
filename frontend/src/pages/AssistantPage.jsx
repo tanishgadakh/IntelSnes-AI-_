@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Bot, Send, Sparkles } from 'lucide-react';
 import api from '../api/client';
+import { parseJwt } from '../utils/jwt';
 
 const starterMessages = [
   'Summarize the latest customer feedback trends.',
   'What are the biggest pain points in support reviews?',
   'Suggest three actions to improve satisfaction.'
 ];
+
+const ALLOWED_ROLES = [ 'ADMIN', 'MANAGER', 'ANALYST' ];
 
 export default function AssistantPage({ token }) {
   const [messages, setMessages] = useState([
@@ -16,6 +19,12 @@ export default function AssistantPage({ token }) {
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const tokenPayload = parseJwt(token);
+  const currentRole = String(tokenPayload?.role || 'GUEST').toUpperCase();
+  const roleMessage = ALLOWED_ROLES.includes(currentRole)
+    ? `${currentRole} users can use the assistant to generate insights and summaries.`
+    : `Only ${ALLOWED_ROLES.join(', ')} accounts can access the assistant.`;
 
   const send = async () => {
     if (!draft.trim()) return;
@@ -63,6 +72,10 @@ export default function AssistantPage({ token }) {
             <h2>IntelSense AI Assistant</h2>
             <p>Ask for summaries, insights, and recommended actions.</p>
           </div>
+        </div>
+        <div className="assistant-access-note">
+          <p><strong>Your role:</strong> {currentRole}</p>
+          <p>{roleMessage}</p>
         </div>
       </div>
       <div className="assistant-grid">
@@ -147,9 +160,10 @@ export default function AssistantPage({ token }) {
             </div>
           )}
           <div className="chat-input-row">
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Ask the assistant..." />
-            <button className="send-btn" onClick={send}><Send size={16} /></button>
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Ask the assistant..." disabled={!ALLOWED_ROLES.includes(currentRole)} />
+            <button className="send-btn" onClick={send} disabled={!ALLOWED_ROLES.includes(currentRole)}>{ALLOWED_ROLES.includes(currentRole) ? <Send size={16} /> : 'Locked'}</button>
           </div>
+          {error && <p className="error">{error}</p>}
         </div>
       </div>
     </div>

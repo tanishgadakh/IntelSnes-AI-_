@@ -18,6 +18,8 @@ public class Feedback {
     @Column(columnDefinition = "TEXT")
     private String aiResult;
 
+    private String createdBy;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Long getId() { return id; }
@@ -30,4 +32,6 @@ public class Feedback {
     public void setAiResult(String aiResult) { this.aiResult = aiResult; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }

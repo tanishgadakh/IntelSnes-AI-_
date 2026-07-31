@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../api/client';
+import { parseJwt } from '../utils/jwt';
 
 const steps = [
   'Cleaning text',
@@ -32,6 +33,10 @@ export default function PredictionPage({ token }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const tokenPayload = parseJwt(token);
+  const currentRole = String(tokenPayload?.role || 'GUEST').toUpperCase();
+  const requiredRoles = [ 'ADMIN', 'MANAGER', 'ANALYST' ];
+
   const analyze = async () => {
     setLoading(true);
     setError('');
@@ -56,6 +61,10 @@ export default function PredictionPage({ token }) {
       <div className="hero-card">
         <h2>AI analysis experience</h2>
         <p>Paste customer feedback and watch the assistant break down sentiment, emotion, aspects, and recommendations.</p>
+        <div className="assistant-access-note">
+          <p><strong>Your role:</strong> {currentRole}</p>
+          <p>Prediction access is enabled for: {requiredRoles.join(', ')}.</p>
+        </div>
       </div>
       <div className="card-grid">
         <div className="panel analysis-panel">

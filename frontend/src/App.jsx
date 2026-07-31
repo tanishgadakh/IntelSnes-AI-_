@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import DashboardPage from './pages/DashboardPage';
 import PredictionPage from './pages/PredictionPage';
@@ -22,6 +23,19 @@ import ProfilePage from './pages/ProfilePage';
 
 function normalizeRole(role) {
   return String(role || '').toUpperCase();
+}
+
+function getDashboardPath(role) {
+  switch (normalizeRole(role)) {
+    case 'ADMIN':
+      return '/admin/dashboard';
+    case 'ANALYST':
+      return '/analyst/dashboard';
+    case 'CUSTOMER':
+      return '/customer/dashboard';
+    default:
+      return '/dashboard';
+  }
 }
 
 function ProtectedRoute({ token, children }) {
@@ -82,10 +96,14 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-        <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route element={<Layout token={auth.token} role={auth.role} username={auth.username} onLogout={handleLogout} theme={theme} onThemeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />}>
           <Route path="/dashboard" element={<ProtectedRoute token={auth.token}><DashboardPage user={auth} /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN' ]}><DashboardPage user={auth} /></RoleRoute>} />
+          <Route path="/analyst/dashboard" element={<RoleRoute token={auth.token} allowedRoles={[ 'ANALYST' ]}><DashboardPage user={auth} /></RoleRoute>} />
+          <Route path="/customer/dashboard" element={<RoleRoute token={auth.token} allowedRoles={[ 'CUSTOMER' ]}><DashboardPage user={auth} /></RoleRoute>} />
           <Route path="/prediction" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN', 'MANAGER', 'ANALYST' ]}><PredictionPage token={auth.token} /></RoleRoute>} />
           <Route path="/analytics" element={<ProtectedRoute token={auth.token}><AnalyticsPage /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute token={auth.token}><HistoryPage /></ProtectedRoute>} />

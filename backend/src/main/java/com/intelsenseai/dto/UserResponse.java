@@ -1,57 +1,61 @@
-package com.intelsenseai.entity;
+package com.intelsenseai.dto;
 
-import jakarta.persistence.*;
+import com.intelsenseai.entity.Status;
+import com.intelsenseai.entity.User;
 
-@Entity
-@Table(name = "users")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserResponse {
     private Long id;
-
-    @Column(unique = true, nullable = false)
     private String username;
-
-    @Column(unique = true, nullable = false)
     private String email;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(name = "first_name")
     private String firstName;
-
-    @Column(name = "last_name")
     private String lastName;
-
-    @Column
-    private String company;
-
-    @Column
     private String phone;
-
-    @Column
+    private String company;
     private String department;
-
-    @Column(name = "job_title")
     private String jobTitle;
-
-    @Column
     private String experience;
-
-    @Column(name = "access_reason", columnDefinition = "TEXT")
     private String reasonForAccess;
-
-    @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
+    private String role;
+    private Status status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role = Role.VIEWER;
+    public UserResponse() { }
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status = Status.PENDING;
+    public UserResponse(Long id, String username, String email, String firstName, String lastName, String phone, String company, String department, String jobTitle, String experience, String reasonForAccess, String rejectionReason, String role, Status status) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.company = company;
+        this.department = department;
+        this.jobTitle = jobTitle;
+        this.experience = experience;
+        this.reasonForAccess = reasonForAccess;
+        this.rejectionReason = rejectionReason;
+        this.role = role;
+        this.status = status;
+    }
+
+    public static UserResponse fromUser(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhone(),
+                user.getCompany(),
+                user.getDepartment(),
+                user.getJobTitle(),
+                user.getExperience(),
+                user.getReasonForAccess(),
+                user.getRejectionReason(),
+                user.getRole().name(),
+                user.getStatus()
+        );
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -59,16 +63,14 @@ public class User {
     public void setUsername(String username) { this.username = username; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
-    public String getCompany() { return company; }
-    public void setCompany(String company) { this.company = company; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+    public String getCompany() { return company; }
+    public void setCompany(String company) { this.company = company; }
     public String getDepartment() { return department; }
     public void setDepartment(String department) { this.department = department; }
     public String getJobTitle() { return jobTitle; }
@@ -79,8 +81,8 @@ public class User {
     public void setReasonForAccess(String reasonForAccess) { this.reasonForAccess = reasonForAccess; }
     public String getRejectionReason() { return rejectionReason; }
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
 }
