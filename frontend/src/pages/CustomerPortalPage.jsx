@@ -75,6 +75,13 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
 
+  const handleUpgradePlan = () => navigate('/help-support');
+  const handleBillingHistory = () => navigate('/billing');
+  const handleExploreReports = () => navigate('/reports');
+  const handleEditProfile = () => navigate('/profile');
+  const handleChangePassword = () => navigate('/settings');
+  const handleAnalyzeFeedback = () => navigate('/prediction');
+
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -235,8 +242,8 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
               <textarea defaultValue="The product is excellent but delivery was delayed twice." />
             </label>
             <div className="customer-actions">
-              <button type="button" className="button-link">Analyze Feedback</button>
-              <button type="button" className="ghost-btn">Export Result</button>
+              <button type="button" className="button-link" onClick={handleAnalyzeFeedback}>Analyze Feedback</button>
+              <button type="button" className="ghost-btn" onClick={handleExploreReports}>Export Result</button>
             </div>
           </div>
           <div className="glass-card customer-panel-card">
@@ -307,8 +314,8 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         <div className="glass-card customer-panel-card">
           <h4>Reports</h4>
           <div className="customer-actions">
-            <button type="button" className="button-link">Download PDF</button>
-            <button type="button" className="ghost-btn">Export CSV</button>
+            <button type="button" className="button-link" onClick={handleExploreReports}>Download PDF</button>
+            <button type="button" className="ghost-btn" onClick={handleExploreReports}>Export CSV</button>
           </div>
           <p className="customer-portal-subtitle">Generate summaries, weekly progress reports, and AI insight exports.</p>
         </div>
@@ -319,8 +326,8 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
           <h4>My Subscription</h4>
           <p>Pro plan · 1,240 predictions remaining · Renews on 15 August 2026</p>
           <div className="customer-actions">
-            <button type="button" className="button-link">Upgrade Plan</button>
-            <button type="button" className="ghost-btn">Billing History</button>
+            <button type="button" className="button-link" onClick={handleUpgradePlan}>Upgrade Plan</button>
+            <button type="button" className="ghost-btn" onClick={handleBillingHistory}>Billing History</button>
           </div>
         </div>
       )}
@@ -343,8 +350,8 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
           <p>Organization: IntelSense Demo</p>
           <p>Email: customer@intelsense.ai</p>
           <div className="customer-actions">
-            <button type="button" className="button-link">Edit Profile</button>
-            <button type="button" className="ghost-btn">Change Password</button>
+            <button type="button" className="button-link" onClick={handleEditProfile}>Edit Profile</button>
+            <button type="button" className="ghost-btn" onClick={handleChangePassword}>Change Password</button>
           </div>
         </div>
       )}

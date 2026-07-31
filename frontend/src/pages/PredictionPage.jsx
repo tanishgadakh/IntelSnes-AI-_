@@ -35,7 +35,7 @@ export default function PredictionPage({ token }) {
 
   const tokenPayload = parseJwt(token);
   const currentRole = String(tokenPayload?.role || 'GUEST').toUpperCase();
-  const requiredRoles = [ 'ADMIN', 'MANAGER', 'ANALYST' ];
+  const requiredRoles = [ 'ADMIN', 'MANAGER', 'ANALYST', 'CUSTOMER' ];
 
   const analyze = async () => {
     setLoading(true);

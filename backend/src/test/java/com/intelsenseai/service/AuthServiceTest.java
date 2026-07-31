@@ -1,8 +1,7 @@
 package com.intelsenseai.service;
 
 import com.intelsenseai.dto.RegistrationRequest;
-import com.intelsenseai.dto.UserResponse;
-import com.intelsenseai.entity.Role;
+import com.intelsenseai.dto.RegistrationResponse;
 import com.intelsenseai.entity.Status;
 import com.intelsenseai.entity.User;
 import com.intelsenseai.repository.UserRepository;
@@ -55,10 +54,11 @@ class AuthServiceTest {
         when(passwordEncoder.encode("secret123")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        UserResponse response = authService.register(request);
+        RegistrationResponse response = authService.register(request);
 
         assertEquals("CUSTOMER", response.getRole());
         assertEquals(Status.ACTIVE, response.getStatus());
+        assertEquals("customer-user", response.getUsername());
         verify(userRepository).save(any(User.class));
     }
 }

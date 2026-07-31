@@ -109,7 +109,7 @@ export default function ReportsPage() {
         <p>Generate professional reports for stakeholders within seconds.</p>
       </div>
       <div className="panel report-actions">
-        <button className="primary-btn">Generate report</button>
+        <button className="primary-btn" onClick={exportCsv}>Generate report</button>
         <button className="primary-btn" onClick={exportCsv} style={{ marginLeft: 12 }}>Export CSV (history)</button>
         <div className="report-metrics">
           {summaryCards.map((card) => (
@@ -126,7 +126,7 @@ export default function ReportsPage() {
             {message && <p className="message">{message}</p>}
           </>
         )}
-        <button className="ghost-btn">Download report</button>
+        <button className="ghost-btn" onClick={exportCsv}>Download report</button>
       </div>
     </div>
   );

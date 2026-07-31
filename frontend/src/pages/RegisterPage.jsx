@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import Toast from '../components/Toast';
 
@@ -25,7 +25,8 @@ const featureItems = [
   'Enterprise Feedback Intelligence'
 ];
 
-export default function RegisterPage() {
+export default function RegisterPage({ onRegister }) {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [company, setCompany] = useState('');
@@ -33,6 +34,7 @@ export default function RegisterPage() {
   const [jobTitle, setJobTitle] = useState('');
   const [experience, setExperience] = useState('');
   const [reasonForAccess, setReasonForAccess] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -96,6 +98,7 @@ export default function RegisterPage() {
         username: email,
         email,
         fullName: `${firstName.trim()} ${lastName.trim()}`,
+        phone: phone || undefined,
         company: isAnalyst ? company : undefined,
         department: isAnalyst ? department : undefined,
         jobTitle: isAnalyst ? jobTitle : undefined,
@@ -105,8 +108,17 @@ export default function RegisterPage() {
         role: selectedRole
       });
 
-      setRegisteredRole(response.data.role || selectedRole);
-      setRegistrationStatus(response.data.status || 'PENDING');
+      const userRole = response.data.role || selectedRole;
+      const userStatus = response.data.status || 'PENDING';
+      setRegisteredRole(userRole);
+      setRegistrationStatus(userStatus);
+
+      if (userStatus === 'ACTIVE' && onRegister) {
+        onRegister({ token: response.data.token || '', role: userRole, username: response.data.username || email });
+        navigate(userRole === 'CUSTOMER' ? '/customer/dashboard' : '/dashboard');
+        return;
+      }
+
       setRegistrationComplete(true);
       setToastMessage('');
     } catch (err) {
@@ -146,7 +158,14 @@ export default function RegisterPage() {
           <div className="verify-body">
             <div className="verify-envelope">{isActive ? '✅' : '⏳'}</div>
             <p>{subtext}</p>
-            <Link className="button-link" to="/login">Continue to login</Link>
+            {isActive ? (
+              <div className="button-group">
+                <Link className="button-link" to="/customer/dashboard">Continue to dashboard</Link>
+                <Link className="ghost-btn" to="/login">Continue to login</Link>
+              </div>
+            ) : (
+              <Link className="button-link" to="/login">Continue to login</Link>
+            )}
           </div>
         </div>
       </div>
@@ -265,7 +284,7 @@ export default function RegisterPage() {
                     </div>
                     <div>
                       <label>Phone (optional)</label>
-                      <input type="tel" placeholder="+1 555 123 4567" />
+                      <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 123 4567" />
                     </div>
                   </div>
 

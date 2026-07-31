@@ -3,6 +3,7 @@ package com.intelsenseai.service;
 import com.intelsenseai.dto.AuthRequest;
 import com.intelsenseai.dto.AuthResponse;
 import com.intelsenseai.dto.RegistrationRequest;
+import com.intelsenseai.dto.RegistrationResponse;
 import com.intelsenseai.dto.RejectionRequest;
 import com.intelsenseai.dto.UserResponse;
 import com.intelsenseai.entity.Role;
@@ -52,7 +53,7 @@ public class AuthService {
         return new AuthResponse(token, user.getRole().name(), user.getUsername());
     }
 
-    public UserResponse register(RegistrationRequest request) {
+    public RegistrationResponse register(RegistrationRequest request) {
         if (request.getUsername() == null || request.getUsername().isBlank() || request.getEmail() == null || request.getEmail().isBlank()) {
             throw new IllegalArgumentException("Email is required for registration.");
         }
@@ -92,7 +93,12 @@ public class AuthService {
         if (role == Role.ANALYST) {
             notificationService.sendAnalystRequestReceivedEmail(saved);
         }
-        return UserResponse.fromUser(saved);
+
+        String token = null;
+        if (saved.getStatus() == Status.ACTIVE) {
+            token = jwtService.generateToken(saved.getUsername(), saved.getRole().name());
+        }
+        return new RegistrationResponse(token, saved.getRole().name(), saved.getUsername(), saved.getStatus());
     }
 
     public List<UserResponse> listPendingRequests() {

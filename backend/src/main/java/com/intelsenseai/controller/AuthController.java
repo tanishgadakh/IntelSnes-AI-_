@@ -3,14 +3,13 @@ package com.intelsenseai.controller;
 import com.intelsenseai.dto.AuthRequest;
 import com.intelsenseai.dto.AuthResponse;
 import com.intelsenseai.dto.RegistrationRequest;
-import com.intelsenseai.dto.UserResponse;
+import com.intelsenseai.dto.RegistrationResponse;
 import com.intelsenseai.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -26,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegistrationRequest request) {
+    public ResponseEntity<RegistrationResponse> register(@Valid @RequestBody RegistrationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 }
