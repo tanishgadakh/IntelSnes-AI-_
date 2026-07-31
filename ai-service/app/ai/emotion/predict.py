@@ -8,11 +8,12 @@ except Exception:
 
 _emotion_pipe = None
 
+
 def _get_emotion_pipeline():
     global _emotion_pipe
     if _emotion_pipe is None:
         if pipeline is None:
-            raise RuntimeError("Transformers is not installed. Install transformers and torch for emotion model support.")
+            return None
         _emotion_pipe = pipeline(
             "text-classification",
             model="j-hartmann/emotion-english-distilroberta-base",
@@ -25,6 +26,8 @@ def predict_emotions(text: str):
     if settings.USE_DUMMY_MODELS:
         return dummy_emotions(text)
     pipe = _get_emotion_pipeline()
+    if pipe is None:
+        return dummy_emotions(text)
     output = pipe(text)
     if not output:
         return {"joy": 0.0, "anger": 0.0, "sadness": 0.0}

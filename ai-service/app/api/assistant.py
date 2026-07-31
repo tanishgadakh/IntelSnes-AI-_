@@ -15,7 +15,10 @@ async def assistant(req: AssistantRequest, db: AsyncSession = Depends(get_db_ses
     summary_service = SummaryService()
 
     prediction = await prediction_service.predict(req.prompt, req.source)
-    recommendations = recommendation_service.suggest(prediction["result"]["sentiment"], prediction["result"]["keywords"])
+    recommendations = await recommendation_service.suggest(
+        prediction["result"].get("sentiment", {}),
+        prediction["result"].get("keywords", []),
+    )
     summary = await summary_service.build_summary(prediction)
 
     return {
