@@ -135,7 +135,6 @@ export default function App() {
           <Route path="/profile" element={<ProtectedRoute token={auth.token}><CustomerPortalPage user={auth} section="profile" /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute token={auth.token}><CustomerPortalPage user={auth} section="settings" /></ProtectedRoute>} />
           <Route path="/help-support" element={<ProtectedRoute token={auth.token}><CustomerPortalPage user={auth} section="help-support" /></ProtectedRoute>} />
-          <Route path="/assistant" element={<ProtectedRoute token={auth.token}><CustomerPortalPage user={auth} section="assistant" /></ProtectedRoute>} />
           <Route path="/admin/dashboard" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN' ]}><AdminPortalPage user={auth} section="dashboard" /></RoleRoute>} />
           <Route path="/admin/users" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN' ]}><AdminPortalPage user={auth} section="users" /></RoleRoute>} />
           <Route path="/admin/requests" element={<RoleRoute token={auth.token} allowedRoles={[ 'ADMIN' ]}><AdminPortalPage user={auth} section="requests" /></RoleRoute>} />

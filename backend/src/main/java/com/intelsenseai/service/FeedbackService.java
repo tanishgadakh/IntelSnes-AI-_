@@ -1,5 +1,7 @@
 package com.intelsenseai.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intelsenseai.client.AiClient;
 import com.intelsenseai.entity.Feedback;
 import com.intelsenseai.repository.FeedbackRepository;
@@ -12,6 +14,7 @@ import java.util.Map;
 @Service
 public class FeedbackService {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final FeedbackRepository feedbackRepository;
     private final AiClient aiClient;
 
@@ -30,7 +33,13 @@ public class FeedbackService {
         Feedback feedback = new Feedback();
         feedback.setText(text);
         feedback.setSource(source);
-        feedback.setAiResult(aiResponse.toString());
+        String aiResultPayload;
+        try {
+            aiResultPayload = OBJECT_MAPPER.writeValueAsString(aiResponse);
+        } catch (JsonProcessingException ex) {
+            aiResultPayload = aiResponse.toString();
+        }
+        feedback.setAiResult(aiResultPayload);
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getName() != null) {

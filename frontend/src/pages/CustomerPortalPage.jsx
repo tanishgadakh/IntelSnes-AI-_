@@ -376,7 +376,7 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
           <h4>AI Assistant</h4>
           <p>Ask about predictions, reports, or your dashboard and get guided support in real time.</p>
           <div className="customer-actions">
-            <button type="button" className="button-link">Start Chat</button>
+            <button type="button" className="button-link" onClick={() => navigate('/assistant')}>Start Chat</button>
           </div>
         </div>
       )}

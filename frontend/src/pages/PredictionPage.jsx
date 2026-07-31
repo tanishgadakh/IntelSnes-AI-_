@@ -47,8 +47,9 @@ export default function PredictionPage({ token }) {
         { text, source: 'web' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setResult(res.data);
-      saveHistoryEntry(res.data, text);
+      const payload = res.data?.result || res.data;
+      setResult(payload);
+      saveHistoryEntry(payload, text);
     } catch {
       setError('Prediction failed. Check that the backend and AI service are running.');
     } finally {
