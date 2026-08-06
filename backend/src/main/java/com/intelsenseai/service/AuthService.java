@@ -2,6 +2,7 @@ package com.intelsenseai.service;
 
 import com.intelsenseai.dto.AuthRequest;
 import com.intelsenseai.dto.AuthResponse;
+import com.intelsenseai.dto.ProfileUpdateRequest;
 import com.intelsenseai.dto.RegistrationRequest;
 import com.intelsenseai.dto.RegistrationResponse;
 import com.intelsenseai.dto.RejectionRequest;
@@ -99,6 +100,51 @@ public class AuthService {
             token = jwtService.generateToken(saved.getUsername(), saved.getRole().name());
         }
         return new RegistrationResponse(token, saved.getRole().name(), saved.getUsername(), saved.getStatus());
+    }
+
+    public UserResponse getProfile(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Authentication required");
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseGet(() -> userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("User not found")));
+        return UserResponse.fromUser(user);
+    }
+
+    public UserResponse updateProfile(String username, ProfileUpdateRequest request) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Authentication required");
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseGet(() -> userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("User not found")));
+
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getCompany() != null) user.setCompany(request.getCompany());
+        if (request.getDepartment() != null) user.setDepartment(request.getDepartment());
+        if (request.getJobTitle() != null) user.setJobTitle(request.getJobTitle());
+        if (request.getExperience() != null) user.setExperience(request.getExperience());
+        if (request.getReasonForAccess() != null) user.setReasonForAccess(request.getReasonForAccess());
+
+        if (request.getEmail() != null && !request.getEmail().isBlank() && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new IllegalArgumentException("Email already in use");
+            }
+            user.setEmail(request.getEmail());
+        }
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
+                throw new IllegalArgumentException("Current password is required to change your password");
+            }
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                throw new IllegalArgumentException("Current password is incorrect");
+            }
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        User saved = userRepository.save(user);
+        return UserResponse.fromUser(saved);
     }
 
     public List<UserResponse> listPendingRequests() {

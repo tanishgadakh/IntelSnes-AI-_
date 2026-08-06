@@ -25,15 +25,19 @@ def _get_emotion_pipeline():
 def predict_emotions(text: str):
     if settings.USE_DUMMY_MODELS:
         return dummy_emotions(text)
-    pipe = _get_emotion_pipeline()
-    if pipe is None:
+    try:
+        pipe = _get_emotion_pipeline()
+        if pipe is None:
+            return dummy_emotions(text)
+        output = pipe(text)
+        if not output:
+            return {"joy": 0.0, "anger": 0.0, "sadness": 0.0}
+        result = {item["label"].lower(): float(item.get("score", 0.0)) for item in output[0]}
+        normalized = {
+            "joy": round(result.get("joy", 0.0), 3),
+            "anger": round(result.get("anger", 0.0), 3),
+            "sadness": round(result.get("sadness", 0.0), 3),
+        }
+        return normalized
+    except Exception:
         return dummy_emotions(text)
-    output = pipe(text)
-    if not output:
-        return {"joy": 0.0, "anger": 0.0, "sadness": 0.0}
-    result = {item["label"].lower(): float(item.get("score", 0.0)) for item in output[0]}
-    return {
-        "joy": result.get("joy", 0.0),
-        "anger": result.get("anger", 0.0),
-        "sadness": result.get("sadness", 0.0),
-    }

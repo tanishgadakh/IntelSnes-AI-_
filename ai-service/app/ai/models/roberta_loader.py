@@ -5,6 +5,8 @@ except Exception:
 
 from threading import Lock
 
+from app.ai.models.dummy import dummy_sentiment
+
 
 class SentimentModel:
     _lock = Lock()
@@ -22,8 +24,18 @@ class SentimentModel:
                     self._pipe = pipeline("sentiment-analysis", model=self.model_name, return_all_scores=False)
 
     def predict(self, text: str):
-        self._ensure()
-        out = self._pipe(text)
-        if isinstance(out, list) and out:
-            return out[0]
-        return {"label": "neutral", "score": 0.0}
+        try:
+            self._ensure()
+            out = self._pipe(text)
+            if isinstance(out, list) and out:
+                result = out[0]
+                label = str(result.get("label", "neutral")).lower()
+                score = float(result.get("score", 0.0))
+                if label.startswith("pos"):
+                    return {"label": "positive", "score": round(score, 3)}
+                if label.startswith("neg"):
+                    return {"label": "negative", "score": round(score, 3)}
+                return {"label": "neutral", "score": round(score, 3)}
+        except Exception:
+            pass
+        return dummy_sentiment(text)

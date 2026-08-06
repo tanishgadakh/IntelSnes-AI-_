@@ -13,5 +13,8 @@ def predict_sentiment(text: str):
         return dummy_sentiment(text)
     if SentimentModel is None:
         return dummy_sentiment(text)
-    model = SentimentModel()
-    return model.predict(text)
+    try:
+        model = SentimentModel()
+        return model.predict(text)
+    except Exception:
+        return dummy_sentiment(text)

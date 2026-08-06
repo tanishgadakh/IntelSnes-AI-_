@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,13 +30,14 @@ class LocalDataSeederTest {
     private LocalDataSeeder localDataSeeder;
 
     @Test
-    void run_createsDemoCustomerWhenMissing() {
-        when(userRepository.findByUsername("demo@company.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("demo123")).thenReturn("encoded-password");
+    void run_createsDemoCustomerAndAdminWhenMissing() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         localDataSeeder.run(null);
 
-        verify(userRepository).save(any(User.class));
+        verify(userRepository, times(2)).save(any(User.class));
     }
 }

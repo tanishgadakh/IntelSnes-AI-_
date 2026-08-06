@@ -4,17 +4,50 @@ from functools import lru_cache
 @lru_cache()
 def dummy_sentiment(text: str):
     lower = text.lower()
-    label = "positive" if "good" in lower or "love" in lower else "negative" if "bad" in lower or "hate" in lower else "neutral"
-    return {"label": label, "score": 0.9}
+    positive_words = {
+        "good", "great", "excellent", "love", "amazing", "best", "perfect", "satisfied",
+        "happy", "awesome", "fantastic", "smooth", "fast", "reliable", "helpful", "easy"
+    }
+    negative_words = {
+        "bad", "hate", "terrible", "awful", "poor", "slow", "late", "broken",
+        "disappointed", "worst", "frustrating", "hard", "difficult", "buggy", "issue",
+        "problem", "fail", "failed", "delay", "delayed"
+    }
+
+    positive_hits = sum(1 for word in positive_words if word in lower)
+    negative_hits = sum(1 for word in negative_words if word in lower)
+
+    if positive_hits > negative_hits:
+        label = "positive"
+        score = min(0.99, 0.7 + positive_hits * 0.05)
+    elif negative_hits > positive_hits:
+        label = "negative"
+        score = min(0.99, 0.7 + negative_hits * 0.05)
+    else:
+        label = "neutral"
+        score = 0.55
+
+    return {"label": label, "score": round(score, 3)}
 
 
 @lru_cache()
 def dummy_emotions(text: str):
     lower = text.lower()
+    joy = 0.2
+    anger = 0.2
+    sadness = 0.2
+
+    if any(word in lower for word in ["love", "great", "excellent", "amazing", "happy", "awesome"]):
+        joy = 0.8
+    if any(word in lower for word in ["hate", "bad", "terrible", "awful", "poor", "frustrating", "angry"]):
+        anger = 0.8
+    if any(word in lower for word in ["sad", "disappointed", "late", "delay", "problem", "issue"]):
+        sadness = 0.75
+
     return {
-        "joy": 0.8 if "love" in lower or "great" in lower else 0.1,
-        "anger": 0.7 if "hate" in lower or "bad" in lower else 0.05,
-        "sadness": 0.6 if "sad" in lower or "disappointed" in lower else 0.05,
+        "joy": round(joy, 3),
+        "anger": round(anger, 3),
+        "sadness": round(sadness, 3),
     }
 
 
@@ -36,10 +69,12 @@ def dummy_topics(text: str):
     topics = []
     if "support" in lower:
         topics.append("support")
-    if "price" in lower or "cost" in lower:
+    if "price" in lower or "cost" in lower or "expensive" in lower:
         topics.append("pricing")
-    if "quality" in lower or "performance" in lower:
+    if "quality" in lower or "performance" in lower or "product" in lower:
         topics.append("product_quality")
+    if "delivery" in lower or "late" in lower or "shipping" in lower:
+        topics.append("delivery")
     if not topics:
         topics.append("general")
     return topics

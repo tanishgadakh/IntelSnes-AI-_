@@ -20,13 +20,22 @@ async def assistant(req: AssistantRequest, db: AsyncSession = Depends(get_db_ses
         prediction["result"].get("keywords", []),
     )
     summary = await summary_service.build_summary(prediction)
+    summary_text = summary.get("summary") or "The analysis pipeline completed successfully."
 
     return {
         "input_text": req.prompt,
         "assistant_message": "The analysis pipeline completed successfully.",
+        "response": summary_text,
+        "summary": summary_text,
+        "sentiment": prediction["result"].get("sentiment", {}),
+        "emotions": prediction["result"].get("emotions", {}),
+        "aspects": prediction["result"].get("aspects", []),
+        "keywords": prediction["result"].get("keywords", []),
+        "topics": prediction["result"].get("topics", []),
         "language": prediction.get("language", "unknown"),
         "confidence": prediction.get("confidence", 0.0),
         "insights": prediction["result"],
         "recommendations": recommendations,
+        "actionableRecommendations": recommendations,
         "explanation": prediction["result"].get("explainability", {}),
     }
