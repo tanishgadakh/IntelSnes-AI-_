@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.pipelines.prediction_pipeline import PredictionPipeline
 from app.repositories.prediction_repository import PredictionRepository
+from app.repositories.analytics_repository import AnalyticsRepository
 
 
 class PredictionService:
@@ -39,4 +40,20 @@ class PredictionService:
             payload["id"] = saved.id
         except Exception:
             payload["id"] = None
+
+        # store a lightweight analytics event for dashboards/alerting (best-effort)
+        try:
+            analytics_payload = {
+                "source": source,
+                "sentiment_label": payload["result"].get("sentiment", {}).get("label"),
+                "sentiment_score": payload["result"].get("sentiment", {}).get("score"),
+                "topics": payload["result"].get("topics", []),
+                "keywords": payload["result"].get("keywords", []),
+                "aspects": payload["result"].get("aspects", []),
+                "summary": payload["result"].get("summary", ""),
+            }
+            analytics_repo = AnalyticsRepository(self.session)
+            await analytics_repo.save(analytics_payload)
+        except Exception:
+            pass
         return payload

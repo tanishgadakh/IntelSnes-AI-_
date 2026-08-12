@@ -15,19 +15,25 @@ async def assistant(req: AssistantRequest, db: AsyncSession = Depends(get_db_ses
     summary_service = SummaryService()
 
     prediction = await prediction_service.predict(req.prompt, req.source)
+    sentiment = prediction["result"].get("sentiment", {})
+    sentiment_label = str(sentiment.get("label", "unknown")).title()
     recommendations = await recommendation_service.suggest(
-        prediction["result"].get("sentiment", {}),
+        sentiment,
         prediction["result"].get("keywords", []),
     )
     summary = await summary_service.build_summary(prediction)
     summary_text = summary.get("summary") or "The analysis pipeline completed successfully."
+    assistant_message = (
+        f"Sentiment detected as {sentiment_label}. "
+        f"Summary: {summary_text}"
+    )
 
     return {
         "input_text": req.prompt,
-        "assistant_message": "The analysis pipeline completed successfully.",
+        "assistant_message": assistant_message,
         "response": summary_text,
         "summary": summary_text,
-        "sentiment": prediction["result"].get("sentiment", {}),
+        "sentiment": sentiment,
         "emotions": prediction["result"].get("emotions", {}),
         "aspects": prediction["result"].get("aspects", []),
         "keywords": prediction["result"].get("keywords", []),

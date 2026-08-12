@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logging import init_logging
-from app.api import health, prediction, summary, analytics, recommendation, admin, history, assistant, reports
+from app.api import health, prediction, summary, analytics, recommendation, admin, history, assistant, reports, alerts, auth
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.middleware.exception_handler import ExceptionMiddleware
 from app.middleware.jwt_auth import JWTAuthMiddleware
@@ -50,19 +50,32 @@ def create_app() -> FastAPI:
     app.include_router(assistant.router, prefix=settings.API_PREFIX, tags=["assistant"])
     app.include_router(summary.router, prefix=settings.API_PREFIX, tags=["summary"])
     app.include_router(analytics.router, prefix=settings.API_PREFIX, tags=["analytics"])
+    app.include_router(alerts.router, prefix=settings.API_PREFIX, tags=["alerts"])
     app.include_router(reports.router, prefix=settings.API_PREFIX, tags=["reports"])
     app.include_router(recommendation.router, prefix=settings.API_PREFIX, tags=["recommendation"])
     app.include_router(admin.router, prefix=settings.API_PREFIX, tags=["admin"])
     app.include_router(history.router, prefix=settings.API_PREFIX, tags=["history"])
+    app.include_router(auth.router, prefix=settings.API_PREFIX, tags=["auth"])
 
     @app.on_event("startup")
     async def startup():
         await redis_client.connect()
         await AIManager.initialize(use_dummy=settings.USE_DUMMY_MODELS)
+        # start background alert scheduler
+        try:
+            from app.services.alert_scheduler import AlertScheduler
+            await AlertScheduler.start()
+        except Exception:
+            pass
 
     @app.on_event("shutdown")
     async def shutdown():
         await redis_client.close()
+        try:
+            from app.services.alert_scheduler import AlertScheduler
+            await AlertScheduler.stop()
+        except Exception:
+            pass
 
     return app
 

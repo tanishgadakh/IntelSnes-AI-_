@@ -21,9 +21,9 @@ async def get_db() -> AsyncIterator[AsyncSession]:
         try:
             yield session
             await session.commit()
-        except Exception:
+        except Exception as e:
             try:
                 await session.rollback()
             except Exception:
                 pass
-            return
+            raise  # Re-raise the exception so FastAPI can handle it properly

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bot, Send, Sparkles } from 'lucide-react';
 import api from '../api/client';
 import { parseJwt } from '../utils/jwt';
@@ -16,6 +16,7 @@ export default function AssistantPage({ token }) {
     { role: 'assistant', text: 'I can help summarize reviews, identify themes, and suggest next actions for your team.' }
   ]);
   const [assistantDetails, setAssistantDetails] = useState(null);
+  const [analyticsOverview, setAnalyticsOverview] = useState(null);
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,6 +64,21 @@ export default function AssistantPage({ token }) {
     }
   };
 
+  // fetch simple analytics overview for trends/alerts
+  const fetchAnalytics = async () => {
+    try {
+      const resp = await api.get('/api/analytics/overview', { headers: { Authorization: `Bearer ${token}` } });
+      setAnalyticsOverview(resp.data || null);
+    } catch (e) {
+      setAnalyticsOverview(null);
+    }
+  };
+
+  // load analytics on mount and when assistant details update
+  useEffect(() => {
+    fetchAnalytics();
+  }, [assistantDetails]);
+
   return (
     <div className="assistant-page">
       <div className="hero-card assistant-card">
@@ -103,7 +119,11 @@ export default function AssistantPage({ token }) {
                 {assistantDetails.sentiment && (
                   <div>
                     <h5>Sentiment</h5>
-                    <p>{assistantDetails.sentiment}</p>
+                    <p>{
+                      typeof assistantDetails.sentiment === 'string'
+                        ? assistantDetails.sentiment
+                        : `${assistantDetails.sentiment.label || 'unknown'} (${assistantDetails.sentiment.score != null ? `${Math.round((assistantDetails.sentiment.score || 0) * 100)}%` : 'n/a'})`
+                    }</p>
                   </div>
                 )}
                 {assistantDetails.language && (
@@ -139,6 +159,17 @@ export default function AssistantPage({ token }) {
                       <li key={index}>{aspect.aspect}: {aspect.sentiment}</li>
                     ))}
                   </ul>
+                </div>
+              )}
+              {analyticsOverview && (
+                <div className="assistant-section">
+                  <h5>Trends & Alerts</h5>
+                  <p>Total events: {analyticsOverview.total_events}</p>
+                  <p>Negative: {analyticsOverview.negative} • Positive: {analyticsOverview.positive} • Neutral: {analyticsOverview.neutral}</p>
+                  <p>Negative ratio: {analyticsOverview.negative_ratio_percent}%</p>
+                  {analyticsOverview.negative_ratio_percent > 30 && (
+                    <div className="alert bad">High negative sentiment detected</div>
+                  )}
                 </div>
               )}
               {assistantDetails.actionableRecommendations?.length > 0 && (

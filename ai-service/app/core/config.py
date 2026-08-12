@@ -9,6 +9,7 @@ from app.core.settings.database import DatabaseSettings
 
 class Settings(BaseSettings):
     APP_NAME: str = Field("IntelSense AI", env="APP_NAME")
+    APP_URL: str = Field("http://localhost:8000", env="APP_URL")
     ENVIRONMENT: str = Field("development", env="ENVIRONMENT")
     API_PREFIX: str = Field("/api/v1", env="API_PREFIX")
     DATABASE_URL: str | None = Field(None, env="DATABASE_URL")
@@ -18,6 +19,17 @@ class Settings(BaseSettings):
     MODEL_CACHE_DIR: str = Field("/models", env="MODEL_CACHE_DIR")
     USE_DUMMY_MODELS: bool = Field(False, env="USE_DUMMY_MODELS")
     LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
+    # Alerting configuration
+    SLACK_WEBHOOK: str | None = Field(None, env="SLACK_WEBHOOK")
+    ALERT_EMAIL_TO: str | None = Field(None, env="ALERT_EMAIL_TO")
+    ALERT_EMAIL_FROM: str | None = Field(None, env="ALERT_EMAIL_FROM")
+    SMTP_HOST: str | None = Field(None, env="SMTP_HOST")
+    SMTP_PORT: int | None = Field(None, env="SMTP_PORT")
+    SMTP_USERNAME: str | None = Field(None, env="SMTP_USERNAME")
+    SMTP_PASSWORD: str | None = Field(None, env="SMTP_PASSWORD")
+    SMTP_USE_TLS: bool = Field(True, env="SMTP_USE_TLS")
+    ALERT_NEGATIVE_RATIO_THRESHOLD: int | None = Field(30, env="ALERT_NEGATIVE_RATIO_THRESHOLD")
+    ALERT_SCHEDULE_SECONDS: int | None = Field(300, env="ALERT_SCHEDULE_SECONDS")
 
     class Config:
         env_file = ".env"

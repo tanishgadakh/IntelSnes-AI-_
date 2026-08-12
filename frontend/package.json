@@ -25,4 +25,9 @@
     "@testing-library/jest-dom": "^6.0.0",
     "jsdom": "^22.1.0"
   }
+  ,
+  "scripts": {
+    "e2e:install": "playwright install --with-deps || true",
+    "e2e": "playwright test"
+  }
 }

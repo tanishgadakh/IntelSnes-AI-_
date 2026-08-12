@@ -25,6 +25,10 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
 
         if path in public_paths or path.startswith("/docs") or path.startswith("/api/v1/docs"):
             return await call_next(request)
+        
+        # Allow all auth endpoints to be public (no JWT required)
+        if path.startswith("/api/v1/auth/"):
+            return await call_next(request)
 
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):

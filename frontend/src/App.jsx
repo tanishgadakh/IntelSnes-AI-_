@@ -29,6 +29,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import AdminPage from './pages/AdminPage';
 import MonitoringPage from './pages/MonitoringPage';
 import ModelCenterPage from './pages/ModelCenterPage';
+import AlertsPage from './pages/AlertsPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import CustomerPortalPage from './pages/CustomerPortalPage';
@@ -137,6 +138,7 @@ export default function App() {
           <Route path="/admin/plans" element={<RoleRoute token={auth.token} allowedRoles={['ADMIN']}><AdminPortalPage user={auth} section="plans" /></RoleRoute>} />
           <Route path="/admin/ai" element={<RoleRoute token={auth.token} allowedRoles={['ADMIN']}><AdminPortalPage user={auth} section="ai" /></RoleRoute>} />
           <Route path="/admin/analytics" element={<RoleRoute token={auth.token} allowedRoles={['ADMIN']}><AdminPortalPage user={auth} section="analytics" /></RoleRoute>} />
+          <Route path="/admin/alerts" element={<RoleRoute token={auth.token} allowedRoles={['ADMIN']}><AlertsPage /></RoleRoute>} />
           <Route path="/admin/reports" element={<RoleRoute token={auth.token} allowedRoles={['ADMIN']}><AdminPortalPage user={auth} section="reports" /></RoleRoute>} />
           <Route path="/admin/security" element={<RoleRoute token={auth.token} allowedRoles={['ADMIN']}><AdminPortalPage user={auth} section="security" /></RoleRoute>} />
           <Route path="/admin/logs" element={<RoleRoute token={auth.token} allowedRoles={['ADMIN']}><AdminPortalPage user={auth} section="logs" /></RoleRoute>} />
