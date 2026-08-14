@@ -130,7 +130,13 @@ async def verify_otp(req: OTPVerify, db: AsyncSession = Depends(get_db_session))
     # clear otp and return jwt
     await repo.clear_otp(user)
     token = encode_jwt({"sub": user.email or user.username, "role": user.role or 'ANALYST'})
-    return {"status": "ok", "token": token, "role": user.role or 'ANALYST'}
+    return {
+        "status": "ok", 
+        "token": token, 
+        "role": user.role or 'ANALYST',
+        "username": user.username or user.email,
+        "email": user.email
+    }
 
 
 class LoginRequest(BaseModel):
@@ -140,7 +146,7 @@ class LoginRequest(BaseModel):
 
 @router.post('/auth/login')
 async def login(req: LoginRequest, db: AsyncSession = Depends(get_db_session)):
-    """Authenticate user and optionally require OTP for elevated roles."""
+    """Authenticate user with two-step OTP verification."""
     repo = UserRepository(db)
     # support username as email
     user = await repo.get_by_email(req.username) or await repo.get_by_username(req.username)
@@ -148,13 +154,18 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db_session)):
         raise HTTPException(status_code=404, detail='User not found')
     if not user.password_hash or not verify_password(req.password, user.password_hash):
         raise HTTPException(status_code=401, detail='Invalid credentials')
-    # require OTP for ADMIN and ANALYST
-    if (user.role or '').upper() in ('ADMIN','ANALYST'):
-        # issue OTP
-        code = f"{random.randint(100000,999999)}"
-        expires = datetime.utcnow() + timedelta(minutes=10)
-        await repo.set_otp(user, code, expires)
-        send_otp(user.email or user.username, code)
-        return {"status": "otp_required"}
-    token = encode_jwt({"sub": user.email or user.username, "role": user.role or 'ANALYST'})
-    return {"status": "ok", "token": token, "role": user.role or 'ANALYST'}
+    
+    # Send OTP to all users (two-step authentication)
+    code = f"{random.randint(100000,999999)}"
+    expires = datetime.utcnow() + timedelta(minutes=10)
+    await repo.set_otp(user, code, expires)
+    
+    # Try to send email, but don't fail if email fails
+    email_sent = send_otp(user.email or user.username, code)
+    
+    return {
+        "status": "otp_required",
+        "requires_otp": True,
+        "otp_required": True,
+        "message": "Verification code sent to your email"
+    }

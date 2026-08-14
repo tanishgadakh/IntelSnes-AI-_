@@ -2,58 +2,43 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import ConfirmModal from './ConfirmModal';
 
-const navItems = [
-  { to: '/dashboard', label: '🏠 Dashboard', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER', 'CUSTOMER' ] },
-  { to: '/ai-studio', label: '🤖 AI Studio', roles: [ 'CUSTOMER' ] },
-  { to: '/submit-feedback', label: '📝 Submit Feedback', roles: [ 'CUSTOMER' ] },
-  { to: '/analytics', label: '📊 Analytics', roles: [ 'CUSTOMER' ] },
-  { to: '/prediction-history', label: '📂 Prediction History', roles: [ 'CUSTOMER' ] },
-  { to: '/reports', label: '📄 Reports', roles: [ 'CUSTOMER' ] },
-  { to: '/subscription', label: '💳 My Subscription', roles: [ 'CUSTOMER' ] },
-  { to: '/notifications', label: '🔔 Notifications', roles: [ 'CUSTOMER' ] },
-  { to: '/profile', label: '👤 Profile', roles: [ 'CUSTOMER' ] },
-  { to: '/settings', label: '⚙️ Settings', roles: [ 'CUSTOMER' ] },
-  { to: '/help-support', label: '❓ Help & Support', roles: [ 'CUSTOMER' ] },
-  { to: '/assistant', label: '💬 AI Assistant', roles: [ 'CUSTOMER' ] },
-  { to: '/analyst/dashboard', label: '🧠 Analyst Dashboard', roles: [ 'ANALYST' ] },
-  { to: '/analyst/analysis', label: '🤖 AI Analysis', roles: [ 'ANALYST' ] },
-  { to: '/analyst/upload', label: '📂 Bulk Upload', roles: [ 'ANALYST' ] },
-  { to: '/analyst/analytics', label: '📊 Analytics', roles: [ 'ANALYST' ] },
-  { to: '/analyst/trends', label: '📈 Sentiment Trends', roles: [ 'ANALYST' ] },
-  { to: '/analyst/insights', label: '🧠 AI Insights', roles: [ 'ANALYST' ] },
-  { to: '/analyst/review-queue', label: '📋 Review Queue', roles: [ 'ANALYST' ] },
-  { to: '/analyst/reports', label: '📑 Reports', roles: [ 'ANALYST' ] },
-  { to: '/analyst/datasets', label: '📁 Dataset Library', roles: [ 'ANALYST' ] },
-  { to: '/analyst/history', label: '📜 Prediction History', roles: [ 'ANALYST' ] },
-  { to: '/analyst/notifications', label: '🔔 Notifications', roles: [ 'ANALYST' ] },
-  { to: '/analyst/profile', label: '👤 Profile', roles: [ 'ANALYST' ] },
-  { to: '/analyst/settings', label: '⚙️ Settings', roles: [ 'ANALYST' ] },
-  { to: '/analyst/help', label: '❓ Help Center', roles: [ 'ANALYST' ] },
-  { to: '/analyst/assistant', label: '💬 AI Copilot', roles: [ 'ANALYST' ] },
-  { to: '/prediction', label: 'AI Workspace', roles: [ 'ADMIN', 'MANAGER', 'ANALYST' ] },
-  { to: '/history', label: 'Prediction History', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
-  { to: '/reports', label: 'Reports', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
-  { to: '/assistant', label: 'AI Assistant', roles: [ 'ADMIN', 'MANAGER', 'ANALYST' ] },
-  { to: '/notifications', label: 'Notifications', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
-  { to: '/admin/dashboard', label: '🏠 Dashboard', roles: [ 'ADMIN' ] },
-  { to: '/admin/users', label: '👥 User Management', roles: [ 'ADMIN' ] },
-  { to: '/admin/requests', label: '✅ Analyst Requests', roles: [ 'ADMIN' ] },
-  { to: '/admin/plans', label: '💳 Subscription Plans', roles: [ 'ADMIN' ] },
-  { to: '/admin/ai', label: '🤖 AI Service', roles: [ 'ADMIN' ] },
-  { to: '/admin/analytics', label: '📊 Platform Analytics', roles: [ 'ADMIN' ] },
-  { to: '/admin/reports', label: '📈 Reports', roles: [ 'ADMIN' ] },
-  { to: '/admin/security', label: '🔒 Security Center', roles: [ 'ADMIN' ] },
-  { to: '/admin/logs', label: '📜 Audit Logs', roles: [ 'ADMIN' ] },
-  { to: '/admin/settings', label: '⚙ System Settings', roles: [ 'ADMIN' ] },
-  { to: '/admin/profile', label: '👤 My Profile', roles: [ 'ADMIN' ] },
-  { to: '/admin/help', label: '❓ Help Center', roles: [ 'ADMIN' ] },
-  { to: '/admin/assistant', label: '💬 Admin Copilot', roles: [ 'ADMIN' ] },
-  { to: '/admin', label: 'User Management', roles: [ 'ADMIN' ] },
-  { to: '/monitoring', label: 'System Monitoring', roles: [ 'ADMIN', 'MANAGER' ] },
-  { to: '/model-center', label: 'Model Center', roles: [ 'ADMIN', 'MANAGER', 'ANALYST' ] },
-  { to: '/settings', label: 'Settings', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] },
-  { to: '/profile', label: 'Profile', roles: [ 'ADMIN', 'MANAGER', 'ANALYST', 'VIEWER' ] }
-];
+const navItems = {
+  CUSTOMER: [
+    { to: '/dashboard', label: '🏠 Dashboard' },
+    { to: '/ai-studio', label: '🤖 AI Studio' },
+    { to: '/prediction', label: '🧠 AI Workspace' },
+    { to: '/analytics', label: '📊 Analytics' },
+    { to: '/reports', label: '📄 Reports' },
+    { to: '/notifications', label: '🔔 Notifications' },
+    { to: '/profile', label: '👤 Profile' },
+    { to: '/settings', label: '⚙️ Settings' }
+  ],
+  ANALYST: [
+    { to: '/analyst/dashboard', label: '🏠 Dashboard' },
+    { to: '/prediction', label: '🧠 AI Workspace' },
+    { to: '/analyst/analysis', label: '🤖 Analysis' },
+    { to: '/analyst/trends', label: '📈 Trends' },
+    { to: '/analyst/review-queue', label: '📋 Review Queue' },
+    { to: '/analytics', label: '📊 Analytics' },
+    { to: '/reports', label: '📄 Reports' },
+    { to: '/notifications', label: '🔔 Notifications' }
+  ],
+  ADMIN: [
+    { to: '/admin/dashboard', label: '🏠 Dashboard' },
+    { to: '/prediction', label: '🧠 AI Workspace' },
+    { to: '/admin/users', label: '👥 Users' },
+    { to: '/admin/analytics', label: '📊 Platform Analytics' },
+    { to: '/admin/ai', label: '🤖 AI Service' },
+    { to: '/admin/reports', label: '📈 Reports' },
+    { to: '/admin/security', label: '🔒 Security' },
+    { to: '/notifications', label: '🔔 Notifications' }
+  ],
+  DEFAULT: [
+    { to: '/dashboard', label: '🏠 Dashboard' },
+    { to: '/prediction', label: '🧠 AI Workspace' },
+    { to: '/notifications', label: '🔔 Notifications' }
+  ]
+};
 
 export default function Layout({ token, role, username, onLogout, theme, onThemeToggle }) {
   const navigate = useNavigate();
@@ -100,7 +85,7 @@ export default function Layout({ token, role, username, onLogout, theme, onTheme
           </div>
         </div>
         <nav>
-          {navItems.filter((item) => item.roles.includes(safeRole)).map((item) => (
+          {(navItems[safeRole] || navItems.DEFAULT).map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               {item.label}
             </NavLink>

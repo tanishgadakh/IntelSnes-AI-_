@@ -4043,8 +4043,16 @@ button, input, textarea {
 .filter-row { display: flex; gap: 0.65rem; flex-wrap: wrap; margin-top: 1rem; }
 .chip { border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: var(--text); padding: 0.65rem 0.95rem; border-radius: 999px; cursor: pointer; }
 .chip-active { background: linear-gradient(135deg, rgba(37,99,235,0.18), rgba(139,92,246,0.14)); }
+.notification-toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.filter-chip { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; transition: all 180ms ease; }
+.filter-chip.active { background: linear-gradient(135deg, rgba(79,70,229,0.25), rgba(6,182,212,0.20)); border-color: rgba(96,165,250,0.38); }
 .notification-item { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.notification-header { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
 .notification-item strong { display: block; margin-bottom: 0.35rem; }
+.notification-badge { display: inline-flex; align-items: center; padding: 0.3rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+.notification-badge.success { background: rgba(34,197,94,0.18); color: #bbf7d0; }
+.notification-badge.warning { background: rgba(245,158,11,0.18); color: #fef3c7; }
+.notification-badge.info { background: rgba(96,165,250,0.15); color: #dbeafe; }
 .history-page .history-tools { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .history-page input, .history-page select { flex: 1; }
 .report-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
@@ -4210,6 +4218,618 @@ th, td { padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); text
 .role-card li { margin-bottom: 0.55rem; }
 .info-panel { margin: 1rem 0 0.7rem; padding: 1rem 1.1rem; border-radius: 18px; background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.16); color: #dbeafe; }
 .password-card { margin: 1rem 0 0.5rem; padding: 1rem 1rem; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); }
+
+/* Portal Navigation Tabs */
+.analyst-nav-tabs, .admin-nav-tabs, .customer-nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(15,23,42,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+
+.analyst-nav-tab, .admin-nav-tab, .customer-nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: all 200ms ease;
+}
+
+.analyst-nav-tab:hover, .admin-nav-tab:hover, .customer-nav-tab:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.16);
+  color: #fff;
+}
+
+.analyst-nav-tab.active, .admin-nav-tab.active, .customer-nav-tab.active {
+  background: rgba(37,99,235,0.2);
+  border-color: rgba(37,99,235,0.4);
+  color: #38bdf8;
+}
+
+.analyst-nav-icon, .admin-nav-icon, .customer-nav-icon {
+  font-size: 1.1rem;
+}
+
+.analyst-nav-label, .admin-nav-label, .customer-nav-label {
+  font-weight: 500;
+}
+
+.user-action-banner {
+  margin: 0.75rem 1rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  color: #dcfce7;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+
+/* COMPREHENSIVE RESPONSIVE DESIGN */
+
+@media (max-width: 1200px) {
+  .analyst-kpi-grid,
+  .admin-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  
+  .analyst-grid.three-col,
+  .admin-grid.three-col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .content-area {
+    padding: 1.2rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  
+  .sidebar nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .nav-link {
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+  }
+  
+  .brand-block {
+    margin-bottom: 0;
+  }
+  
+  .logout-btn {
+    width: auto;
+    margin-top: 0;
+    padding: 0.6rem 1rem;
+  }
+  
+  .analyst-kpi-grid,
+  .admin-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .analyst-grid.three-col,
+  .admin-grid.three-col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .content-area {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .analyst-kpi-grid,
+  .admin-kpi-grid,
+  .customer-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .analyst-grid.two-col,
+  .admin-grid.two-col,
+  .customer-panels {
+    grid-template-columns: 1fr;
+  }
+  
+  .prediction-page .card-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-section,
+  .solutions-hero,
+  .enterprise-hero,
+  .documentation-hero,
+  .ai-hero {
+    grid-template-columns: 1fr;
+    padding: 2rem 1.5rem 1.5rem;
+  }
+  
+  .dashboard-cards,
+  .testimonial-grid,
+  .enterprise-grid,
+  .benefit-grid,
+  .security-grid,
+  .integration-grid,
+  .support-grid,
+  .success-grid,
+  .deployment-grid,
+  .feature-grid,
+  .problem-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .workflow-flow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    flex-wrap: wrap;
+  }
+  
+  .sidebar nav {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .analyst-nav-tabs, .admin-nav-tabs, .customer-nav-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 0.8rem 0.5rem;
+    gap: 0.3rem;
+  }
+  
+  .analyst-nav-tab, .admin-nav-tab, .customer-nav-tab {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .analyst-nav-label, .admin-nav-label, .customer-nav-label {
+    display: none;
+  }
+  
+  .analyst-nav-icon, .admin-nav-icon, .customer-nav-icon {
+    font-size: 1rem;
+  }
+  
+  .analyst-hero-card,
+  .admin-hero-card,
+  .customer-portal-header,
+  .analyst-panel-card,
+  .admin-panel-card,
+  .customer-panel-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+  
+  .analyst-kpi-grid,
+  .admin-kpi-grid,
+  .customer-stats-grid,
+  .customer-panels,
+  .dashboard-cards,
+  .testimonial-grid,
+  .architecture-grid,
+  .model-grid,
+  .enterprise-grid,
+  .benefit-grid,
+  .security-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-section,
+  .solutions-hero,
+  .enterprise-hero,
+  .documentation-hero,
+  .ai-hero,
+  .auth-grid,
+  .estimator-grid,
+  .industry-solution-card,
+  .comparison-grid,
+  .tech-grid,
+  .xai-panel {
+    grid-template-columns: 1fr;
+  }
+  
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .topbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .analyst-actions-row,
+  .admin-actions-row,
+  .customer-actions,
+  .analyst-hero-actions,
+  .admin-hero-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .analyst-actions-row button,
+  .admin-actions-row button,
+  .customer-actions button {
+    width: 100%;
+  }
+  
+  .analyst-grid.two-col,
+  .admin-grid.two-col {
+    grid-template-columns: 1fr;
+  }
+  
+  .analyst-panel-header,
+  .admin-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .chart-card {
+    min-height: 200px;
+  }
+  
+  .word-cloud {
+    min-height: 100px;
+  }
+  
+  .analyst-table-head,
+  .admin-table-head,
+  .customer-table-head {
+    display: none;
+  }
+  
+  .analyst-table-row,
+  .admin-table-row,
+  .customer-table-row {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    margin-bottom: 0.6rem;
+  }
+  
+  .workflow-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    font-size: 14px;
+  }
+  
+  body {
+    padding: 0;
+  }
+  
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 70vw;
+    height: 100vh;
+    padding: 1rem;
+    background: rgba(15,23,42,0.98);
+    border: none;
+    z-index: 100;
+    transition: left 300ms ease;
+  }
+  
+  .sidebar.open {
+    left: 0;
+  }
+  
+  .main-panel {
+    width: 100%;
+  }
+  
+  .content-area {
+    padding: 0.8rem;
+  }
+  
+  .topbar {
+    padding: 0.8rem 1rem;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  
+  .topbar h3 {
+    font-size: 1rem;
+    margin: 0;
+  }
+  
+  .topbar p {
+    display: none;
+  }
+  
+  .topbar-actions {
+    gap: 0.3rem;
+  }
+  
+  .hero-card {
+    padding: 1rem;
+  }
+  
+  .panel {
+    padding: 1rem;
+  }
+  
+  .analyst-hero-card,
+  .admin-hero-card,
+  .customer-portal-header,
+  .analyst-panel-card,
+  .admin-panel-card,
+  .customer-panel-card {
+    padding: 0.9rem;
+    border-radius: 16px;
+  }
+  
+  .analyst-kpi-grid,
+  .admin-kpi-grid,
+  .customer-stats-grid,
+  .customer-panels,
+  .dashboard-cards,
+  .metric-grid,
+  .trusted-grid,
+  .problem-grid,
+  .step-grid,
+  .feature-grid,
+  .architecture-grid,
+  .model-grid,
+  .enterprise-grid,
+  .role-grid,
+  .analytics-grid,
+  .testimonial-grid,
+  .pricing-grid,
+  .faq-grid,
+  .workflow-flow,
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .auth-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .auth-left {
+    display: none;
+  }
+  
+  .auth-right {
+    padding: 1.5rem 1rem;
+  }
+  
+  .auth-card {
+    width: 100%;
+    padding: 1.5rem 1rem;
+  }
+  
+  .analyst-textarea,
+  .admin-textarea,
+  input,
+  textarea {
+    font-size: 16px;
+    padding: 0.8rem;
+  }
+  
+  button,
+  .button-link,
+  .ghost-btn,
+  .primary-btn {
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+  }
+  
+  .analyst-textarea.large {
+    min-height: 160px;
+  }
+  
+  .chart-card {
+    min-height: 160px;
+  }
+  
+  .hero-section,
+  .solutions-hero,
+  .enterprise-hero,
+  .documentation-hero,
+  .ai-hero {
+    padding: 1.5rem 0.8rem 1rem;
+  }
+  
+  .hero-copy h2,
+  .solutions-hero-copy h2,
+  .enterprise-hero-copy h2,
+  .documentation-hero-copy h2,
+  .ai-hero-copy h2,
+  .features-hero-copy h2 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+  }
+  
+  .landing-nav {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.8rem 1rem;
+  }
+  
+  .landing-nav-links {
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .landing-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .landing-actions .button-link,
+  .landing-actions .ghost-btn {
+    width: 100%;
+  }
+  
+  .cta-panel {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem 1rem;
+    gap: 1rem;
+  }
+  
+  .cta-panel h3 {
+    font-size: 1.5rem;
+  }
+  
+  .trusted-section,
+  .stats-section,
+  .features-section,
+  .technology-section,
+  .dashboard-preview-section,
+  .workflow-section,
+  .testimonials-section,
+  .pricing-section,
+  .faq-section,
+  .site-footer {
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .section-heading h3 {
+    font-size: 1.3rem;
+  }
+  
+  .analyst-chip,
+  .admin-chip {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
+  }
+  
+  .pill {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  table {
+    width: 100%;
+    font-size: 0.9rem;
+  }
+  
+  th,
+  td {
+    padding: 0.6rem 0.5rem;
+  }
+  
+  .action-btn {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8rem;
+  }
+  
+  .floating-copilot {
+    width: 48px;
+    height: 48px;
+    right: 0.8rem;
+    bottom: 0.8rem;
+  }
+  
+  .copilot-card {
+    width: 90vw;
+    right: 5vw;
+    bottom: 5rem;
+  }
+  
+  .hero-visual,
+  .enterprise-visual,
+  .ai-hero-visual {
+    min-height: 300px;
+  }
+  
+  .floating-card {
+    position: static;
+    width: 100%;
+    margin-bottom: 0.8rem;
+  }
+  
+  .card-one,
+  .card-two,
+  .card-three,
+  .card-four,
+  .ai-card-one,
+  .ai-card-two,
+  .ai-card-three,
+  .ai-card-four {
+    position: static;
+    margin: 0.5rem auto;
+  }
+  
+  .feature-hero-panel {
+    width: 100%;
+  }
+  
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .auth-divider::before,
+  .auth-divider::after {
+    display: none;
+  }
+  
+  .auth-divider {
+    gap: 0;
+  }
+  
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-grid.two-column {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-metrics,
+  .mini-metrics {
+    grid-template-columns: 1fr;
+  }
+}
 .password-card-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; }
 .password-checklist { margin: 0; padding-left: 1.1rem; color: #94a3b8; list-style: none; }
 .password-checklist li { margin-bottom: 0.55rem; }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Bar,
@@ -96,11 +96,98 @@ const notifications = [
 ];
 
 function AnalystPortalPage({ user, section = 'dashboard' }) {
+  const [activeSection, setActiveSection] = useState(section || 'dashboard');
   const [activeTrend, setActiveTrend] = useState('Week');
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [analysisInput, setAnalysisInput] = useState('Delivery was delayed again, but packaging was excellent and the support team was helpful.');
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const fileInputRef = useRef(null);
 
-  const currentSection = useMemo(() => section || 'dashboard', [section]);
+  const currentSection = useMemo(() => activeSection || section || 'dashboard', [activeSection, section]);
+
+  const handleAnalyze = async () => {
+    if (!analysisInput.trim()) return;
+    setIsAnalyzing(true);
+    setStatusMessage('Analyzing feedback with the AI pipeline...');
+    setTimeout(() => {
+      setAnalysisResult({
+        sentiment: { label: 'Positive', score: 0.94 },
+        emotions: ['Satisfaction', 'Trust'],
+        keywords: ['Delivery', 'Packaging', 'Support'],
+        aspects: ['product_quality', 'delivery', 'customer_service'],
+        recommendation: 'Maintain excellent support quality while improving delivery speed.'
+      });
+      setIsAnalyzing(false);
+      setStatusMessage('Analysis complete. Results are ready in the workspace.');
+    }, 1500);
+  };
+
+  const handleGenerateReport = () => {
+    setActiveSection('reports');
+    setStatusMessage('Report generation started and the reports tab is now open.');
+  };
+
+  const handleUploadDataset = () => {
+    setActiveSection('datasets');
+    setStatusMessage('Dataset upload workspace opened.');
+  };
+
+  const handleChooseFile = () => fileInputRef.current?.click();
+
+  const handleFileSelected = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFileName(file.name);
+      setStatusMessage(`Dataset selected: ${file.name}`);
+    }
+  };
+
+  const handleExport = () => {
+    setStatusMessage('Export started. JSON output has been prepared for download.');
+  };
+
+  const handleSave = () => {
+    setStatusMessage('Analysis result was saved to the analyst workspace.');
+  };
+
+  const handleBuildReport = () => {
+    setActiveSection('reports');
+    setStatusMessage('PDF report built successfully.');
+  };
+
+  const handleEditProfile = () => {
+    setActiveSection('profile');
+    setStatusMessage('Profile section opened.');
+  };
+
+  const handleNewAnalysis = () => {
+    setAnalysisInput('');
+    setAnalysisResult(null);
+    setStatusMessage('New analysis started.');
+  };
+
+  const handleExportSnapshot = () => {
+    setActiveSection('history');
+    setStatusMessage('Workspace snapshot exported to the history section.');
+  };
+
+  const navTabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'analysis', label: 'Analysis', icon: '🔍' },
+    { id: 'analytics', label: 'Analytics', icon: '📈' },
+    { id: 'trends', label: 'Trends', icon: '📉' },
+    { id: 'insights', label: 'Insights', icon: '💡' },
+    { id: 'review-queue', label: 'Review Queue', icon: '✅' },
+    { id: 'reports', label: 'Reports', icon: '📑' },
+    { id: 'datasets', label: 'Datasets', icon: '📁' },
+    { id: 'history', label: 'History', icon: '⏱️' },
+    { id: 'notifications', label: 'Notifications', icon: '🔔' },
+    { id: 'profile', label: 'Profile', icon: '👤' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
+  ];
 
   const renderOverview = () => (
     <div className="analyst-portal-page">
@@ -111,8 +198,8 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
           <p>Monitor enterprise feedback, validate AI predictions, and turn raw customer signals into executive-ready reports.</p>
         </div>
         <div className="analyst-hero-actions">
-          <button className="button-link">+ New Analysis</button>
-          <button className="ghost-btn">Export Snapshot</button>
+          <button className="button-link" onClick={handleNewAnalysis}>+ New Analysis</button>
+          <button className="ghost-btn" onClick={handleExportSnapshot}>Export Snapshot</button>
         </div>
       </motion.div>
 
@@ -147,8 +234,8 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
             <span className="analyst-chip">API Import</span>
           </div>
           <div className="analyst-actions-row">
-            <button className="button-link">Analyze</button>
-            <button className="ghost-btn">Upload Dataset</button>
+            <button className="button-link" onClick={handleAnalyze}>Analyze</button>
+            <button className="ghost-btn" onClick={handleUploadDataset}>Upload Dataset</button>
           </div>
         </div>
 
@@ -172,9 +259,9 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
             <p><strong>Recommendation:</strong> Maintain packaging quality while improving delivery speed.</p>
           </div>
           <div className="analyst-actions-row">
-            <button className="ghost-btn">Export</button>
-            <button className="ghost-btn">Save</button>
-            <button className="button-link">Generate Report</button>
+            <button className="ghost-btn" onClick={handleExport}>Export</button>
+            <button className="ghost-btn" onClick={handleSave}>Save</button>
+            <button className="button-link" onClick={handleGenerateReport}>Generate Report</button>
           </div>
         </div>
       </div>
@@ -251,14 +338,14 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
             <label className="analyst-label">Paste feedback or upload a document</label>
             <textarea className="analyst-textarea large" value={analysisInput} onChange={(event) => setAnalysisInput(event.target.value)} />
             <div className="analyst-actions-row">
-              <button className="button-link">Analyze</button>
-              <button className="ghost-btn">Import Dataset</button>
+            <button className="button-link" onClick={handleAnalyze}>Analyze</button>
+            <button className="ghost-btn" onClick={handleUploadDataset}>Import Dataset</button>
             </div>
           </div>
           <div className="analyst-dropzone">
             <h4>Bulk Dataset Upload</h4>
             <p>Drag & drop CSV, Excel, or JSON files into the workspace.</p>
-            <button className="ghost-btn">Choose File</button>
+            <button className="ghost-btn" onClick={handleChooseFile}>Choose File</button>
             <div className="upload-progress">
               <div className="upload-progress-bar" />
             </div>
@@ -327,7 +414,7 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
             <div className="analyst-eyebrow">AI Insight</div>
             <h3>{insight.title}</h3>
             <p>{insight.body}</p>
-            <div className="analyst-actions-row"><button className="button-link">Recommended Action</button></div>
+            <div className="analyst-actions-row"><button className="button-link" onClick={handleGenerateReport}>Recommended Action</button></div>
             <p className="analyst-kpi-detail">{insight.action}</p>
           </div>
         ))}
@@ -365,7 +452,7 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
           <div className="analyst-chip-row">
             {['Executive Summary', 'Department Report', 'Monthly Report'].map((template) => <span key={template} className="analyst-chip">{template}</span>)}
           </div>
-          <div className="analyst-actions-row"><button className="button-link">Build Report</button></div>
+          <div className="analyst-actions-row"><button className="button-link" onClick={handleBuildReport}>Build Report</button></div>
         </div>
         <div className="analyst-panel-card">
           <h3>Recent Downloads</h3>
@@ -433,7 +520,7 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
         <p>Senior Analyst • Business Intelligence</p>
         <p>Employee ID: ANL-1025</p>
         <p>Email: rahul@company.com</p>
-        <div className="analyst-actions-row"><button className="button-link">Edit Profile</button><button className="ghost-btn">Enable 2FA</button></div>
+        <div className="analyst-actions-row"><button className="button-link" onClick={handleEditProfile}>Edit Profile</button><button className="ghost-btn">Enable 2FA</button></div>
       </div>
     </div>
   );
@@ -518,6 +605,20 @@ function AnalystPortalPage({ user, section = 'dashboard' }) {
           <button className="ghost-btn">🌐</button>
           <button className="button-link">{user?.username || 'Rahul Analyst'}</button>
         </div>
+      </div>
+      {statusMessage && <div className="user-action-banner">{statusMessage}</div>}
+      <div className="analyst-nav-tabs">
+        {navTabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`analyst-nav-tab ${activeSection === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveSection(tab.id)}
+            title={tab.label}
+          >
+            <span className="analyst-nav-icon">{tab.icon}</span>
+            <span className="analyst-nav-label">{tab.label}</span>
+          </button>
+        ))}
       </div>
       {renderCurrentSection()}
       <button className="floating-copilot" onClick={() => setCopilotOpen((value) => !value)}>

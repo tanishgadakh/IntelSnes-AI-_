@@ -51,8 +51,35 @@ const auditLogs = [
 ];
 
 function AdminPortalPage({ user, section = 'dashboard' }) {
-  const [activeView, setActiveView] = useState('dashboard');
-  const currentSection = useMemo(() => section || activeView, [section, activeView]);
+  const [activeView, setActiveView] = useState(section || 'dashboard');
+  const currentSection = useMemo(() => activeView || section || 'dashboard', [activeView, section]);
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const handleCreateAnalyst = () => { setActiveView('requests'); setStatusMessage('Analyst request flow opened.'); };
+  const handleExportSnapshot = () => { setActiveView('reports'); setStatusMessage('Platform snapshot prepared for export.'); };
+  const handleApprove = () => { setActiveView('users'); setStatusMessage('Analyst approved and added to active users.'); };
+  const handleReject = () => { setActiveView('requests'); setStatusMessage('Analyst request rejected and flagged for follow-up.'); };
+  const handleRequestInfo = () => setStatusMessage('Additional information requested from the analyst.');
+  const handleViewRequest = () => { setActiveView('requests'); setStatusMessage('Detailed request opened.'); };
+  const handleEditUser = () => { setActiveView('users'); setStatusMessage('User edit workspace opened.'); };
+  const handleReloadModel = () => setStatusMessage('RoBERTa model reloaded successfully.');
+  const handleRestartService = () => setStatusMessage('AI service restart triggered successfully.');
+  const handleSavePlan = () => setStatusMessage('Plan changes saved successfully.');
+  const handleGenerateReport = () => { setActiveView('reports'); setStatusMessage('Admin report generation started.'); };
+
+  const navTabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'users', label: 'Users', icon: '👥' },
+    { id: 'requests', label: 'Requests', icon: '📋' },
+    { id: 'plans', label: 'Plans', icon: '💳' },
+    { id: 'ai', label: 'AI Service', icon: '🤖' },
+    { id: 'analytics', label: 'Analytics', icon: '📈' },
+    { id: 'reports', label: 'Reports', icon: '📑' },
+    { id: 'security', label: 'Security', icon: '🔒' },
+    { id: 'logs', label: 'Logs', icon: '📋' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'profile', label: 'Profile', icon: '👤' },
+  ];
 
   const renderOverview = () => (
     <div className="admin-portal-page">
@@ -63,8 +90,8 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
           <p>Monitor the platform, approve analysts, control subscriptions, and keep AI services operating at enterprise scale.</p>
         </div>
         <div className="admin-hero-actions">
-          <button className="button-link">Create Analyst</button>
-          <button className="ghost-btn">Export Snapshot</button>
+          <button className="button-link" onClick={handleCreateAnalyst}>Create Analyst</button>
+          <button className="ghost-btn" onClick={handleExportSnapshot}>Export Snapshot</button>
         </div>
       </motion.div>
 
@@ -95,7 +122,7 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
                 <span>{request.name}</span>
                 <span>{request.organization}</span>
                 <span>{request.status}</span>
-                <span><button className="ghost-btn small">View</button></span>
+                <span><button className="ghost-btn small" onClick={handleViewRequest}>View</button></span>
               </div>
             ))}
           </div>
@@ -107,9 +134,9 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
           <p><strong>Organization:</strong> ABC Technologies</p>
           <p><strong>Documents:</strong> Resume, ID Proof, Certificates</p>
           <div className="admin-actions-row">
-            <button className="button-link">Approve</button>
-            <button className="ghost-btn">Reject</button>
-            <button className="ghost-btn">Request Info</button>
+            <button className="button-link" onClick={handleApprove}>Approve</button>
+            <button className="ghost-btn" onClick={handleReject}>Reject</button>
+            <button className="ghost-btn" onClick={handleRequestInfo}>Request Info</button>
           </div>
         </div>
       </div>
@@ -153,7 +180,7 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
               <span>Northwind Labs</span>
               <span>Enterprise</span>
               <span>Active</span>
-              <span><button className="ghost-btn small">Edit</button></span>
+              <span><button className="ghost-btn small" onClick={handleEditUser}>Edit</button></span>
             </div>
           ))}
         </div>
@@ -173,7 +200,7 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
               <span>{request.organization}</span>
               <span>{request.experience}</span>
               <span>{request.status}</span>
-              <span><button className="ghost-btn small">Review</button></span>
+              <span><button className="ghost-btn small" onClick={handleViewRequest}>Review</button></span>
             </div>
           ))}
         </div>
@@ -195,7 +222,7 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
             <ul>
               {plan.features.map((feature) => <li key={feature}>{feature}</li>)}
             </ul>
-            <div className="admin-actions-row"><button className="button-link">Save</button></div>
+            <div className="admin-actions-row"><button className="button-link" onClick={handleSavePlan}>Save</button></div>
           </div>
         ))}
       </div>
@@ -210,7 +237,7 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
           <div className="admin-list">
             {['RoBERTa Enterprise — Online', 'Emotion Model — Healthy', 'Aspect Model — Healthy', 'Recommendation Engine — Healthy'].map((item) => <div key={item} className="admin-list-item">{item}</div>)}
           </div>
-          <div className="admin-actions-row"><button className="ghost-btn">Reload Model</button><button className="ghost-btn">Restart Service</button></div>
+          <div className="admin-actions-row"><button className="ghost-btn" onClick={handleReloadModel}>Reload Model</button><button className="ghost-btn" onClick={handleRestartService}>Restart Service</button></div>
         </div>
         <div className="admin-panel-card">
           <div className="admin-panel-header"><h3>Model Performance</h3><span className="pill">Latency</span></div>
@@ -300,7 +327,7 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
         <p><strong>Role:</strong> System Admin</p>
         <p><strong>Email:</strong> admin@intelsense.ai</p>
         <p><strong>Last Login:</strong> Today</p>
-        <div className="admin-actions-row"><button className="button-link">Edit Profile</button><button className="ghost-btn">Enable MFA</button></div>
+        <div className="admin-actions-row"><button className="button-link" onClick={handleEditUser}>Edit Profile</button><button className="ghost-btn">Enable MFA</button></div>
       </div>
     </div>
   );
@@ -370,6 +397,20 @@ function AdminPortalPage({ user, section = 'dashboard' }) {
           <button className="button-link">{user?.username || 'Super Admin'}</button>
         </div>
       </div>
+      <div className="admin-nav-tabs">
+        {navTabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`admin-nav-tab ${activeView === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveView(tab.id)}
+            title={tab.label}
+          >
+            <span className="admin-nav-icon">{tab.icon}</span>
+            <span className="admin-nav-label">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+      {statusMessage && <div className="user-action-banner">{statusMessage}</div>}
       {renderCurrentSection()}
       <button className="floating-copilot admin-float">✦</button>
     </div>

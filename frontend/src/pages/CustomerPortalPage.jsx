@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 
@@ -67,20 +67,43 @@ const supportItems = [
 
 export default function CustomerPortalPage({ section = 'dashboard', user }) {
   const navigate = useNavigate();
-  const meta = sectionMeta[section] || sectionMeta.dashboard;
+  const [activeSection, setActiveSection] = useState(section || 'dashboard');
+  const currentSection = activeSection || section || 'dashboard';
+  const meta = sectionMeta[currentSection] || sectionMeta.dashboard;
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [feedbackForm, setFeedbackForm] = useState({ title: '', category: '', details: '' });
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [studioText, setStudioText] = useState('The product is excellent but delivery was delayed twice.');
+  const [studioResult, setStudioResult] = useState(null);
+  const [studioLoading, setStudioLoading] = useState(false);
+  const [studioError, setStudioError] = useState('');
+
+  const navTabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'ai-studio', label: 'AI Studio', icon: '🎯' },
+    { id: 'submit-feedback', label: 'Submit Feedback', icon: '📝' },
+    { id: 'analytics', label: 'Analytics', icon: '📈' },
+    { id: 'prediction-history', label: 'History', icon: '⏱️' },
+    { id: 'reports', label: 'Reports', icon: '📑' },
+    { id: 'subscription', label: 'Subscription', icon: '💳' },
+    { id: 'notifications', label: 'Notifications', icon: '🔔' },
+    { id: 'profile', label: 'Profile', icon: '👤' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
+  ];
 
   const handleUpgradePlan = () => navigate('/help-support');
   const handleBillingHistory = () => navigate('/billing');
-  const handleExploreReports = () => navigate('/reports');
-  const handleEditProfile = () => navigate('/profile');
-  const handleChangePassword = () => navigate('/settings');
+  const handleExploreReports = () => alert('Report download initiated...');
+  const handleEditProfile = () => alert('Edit profile dialog would open');
+  const handleChangePassword = () => alert('Change password dialog would open');
   const handleAnalyzeFeedback = () => navigate('/prediction');
+  const handleAttachFile = () => alert('File attachment dialog would open');
+  const handleDownloadPDF = () => alert('Downloading PDF report...');
+  const handleExportCSV = () => alert('Exporting to CSV...');
+  const handleEnableMFA = () => alert('MFA setup dialog would open');
 
   useEffect(() => {
     let cancelled = false;
@@ -167,6 +190,31 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
     }
   };
 
+  const handleStudioAnalysis = async () => {
+    if (!studioText.trim()) {
+      setStudioError('Please enter some customer feedback before running the analysis.');
+      return;
+    }
+
+    setStudioLoading(true);
+    setStudioError('');
+    setStudioResult(null);
+
+    try {
+      const token = localStorage.getItem('intelsense-token') || '';
+      const resp = await api.post('/api/feedback', { text: studioText, source: 'customer-portal' }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const payload = resp.data?.result || resp.data || {};
+      setStudioResult(payload);
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.response?.data?.detail || 'Unable to analyze this feedback right now.';
+      setStudioError(message);
+    } finally {
+      setStudioLoading(false);
+    }
+  };
+
   return (
     <div className="customer-portal-page">
       <div className="customer-portal-header glass-card">
@@ -178,7 +226,23 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         <div className="customer-portal-badge">Customer Plan · Pro</div>
       </div>
 
-      {section === 'dashboard' && (
+      {statusMessage && <div className="user-action-banner">{statusMessage}</div>}
+
+      <div className="customer-nav-tabs">
+        {navTabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`customer-nav-tab ${currentSection === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveSection(tab.id)}
+            title={tab.label}
+          >
+            <span className="customer-nav-icon">{tab.icon}</span>
+            <span className="customer-nav-label">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {currentSection === 'dashboard' && (
         <div className="customer-grid">
           <section className="glass-card customer-hero-card">
             <div>
@@ -233,32 +297,39 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'ai-studio' && (
+      {currentSection === 'ai-studio' && (
         <div className="customer-grid single-grid">
           <div className="glass-card customer-panel-card">
             <h4>AI Studio</h4>
             <label>
               <span>Enter feedback text</span>
-              <textarea defaultValue="The product is excellent but delivery was delayed twice." />
+              <textarea value={studioText} onChange={(e) => setStudioText(e.target.value)} rows={8} />
             </label>
             <div className="customer-actions">
-              <button type="button" className="button-link" onClick={handleAnalyzeFeedback}>Analyze Feedback</button>
-              <button type="button" className="ghost-btn" onClick={handleExploreReports}>Export Result</button>
+              <button type="button" className="button-link" onClick={handleStudioAnalysis} disabled={studioLoading}>
+                {studioLoading ? 'Analyzing…' : 'Analyze Feedback'}
+              </button>
+              <button type="button" className="ghost-btn" onClick={handleExportCSV}>Export Result</button>
             </div>
+            {studioError && <p className="customer-portal-subtitle error">{studioError}</p>}
           </div>
           <div className="glass-card customer-panel-card">
             <h4>Analysis summary</h4>
-            <ul>
-              <li><strong>Sentiment:</strong> Positive</li>
-              <li><strong>Emotion:</strong> Satisfaction</li>
-              <li><strong>Keywords:</strong> Product, delivery, experience</li>
-              <li><strong>Recommendation:</strong> Improve delivery reliability</li>
-            </ul>
+            {studioResult ? (
+              <ul>
+                <li><strong>Sentiment:</strong> {studioResult.sentiment?.label || 'n/a'} ({studioResult.sentiment?.score ?? 'n/a'})</li>
+                <li><strong>Summary:</strong> {studioResult.summary || 'No summary available.'}</li>
+                <li><strong>Keywords:</strong> {(studioResult.keywords || []).join(', ') || 'Not available'}</li>
+                <li><strong>Recommendation:</strong> {(studioResult.recommendations || []).slice(0, 2).join(' • ') || 'No recommendation yet'}</li>
+              </ul>
+            ) : (
+              <p className="customer-portal-subtitle">Run an analysis to populate the summary.</p>
+            )}
           </div>
         </div>
       )}
 
-      {section === 'submit-feedback' && (
+      {currentSection === 'submit-feedback' && (
         <form onSubmit={handleFeedbackSubmit} className="glass-card customer-panel-card">
           <h4>Submit Feedback</h4>
           <label>
@@ -273,15 +344,17 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
             <span>Details</span>
             <textarea value={feedbackForm.details} onChange={(e) => setFeedbackForm((prev) => ({ ...prev, details: e.target.value }))} placeholder="Describe the issue or praise you want to send for analysis." />
           </label>
+          <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileSelected} />
           <div className="customer-actions">
             <button type="submit" className="button-link" disabled={feedbackSubmitting}>{feedbackSubmitting ? 'Submitting…' : 'Save Feedback'}</button>
-            <button type="button" className="ghost-btn">Attach File</button>
+            <button type="button" className="ghost-btn" onClick={handleAttachFile}>Attach File</button>
           </div>
+          {attachedFileName && <p className="customer-portal-subtitle">Attached file: {attachedFileName}</p>}
           {feedbackMessage && <p className="customer-portal-subtitle">{feedbackMessage}</p>}
         </form>
       )}
 
-      {section === 'analytics' && (
+      {currentSection === 'analytics' && (
         <div className="customer-grid single-grid">
           <div className="glass-card customer-panel-card">
             <h4>Sentiment distribution</h4>
@@ -294,7 +367,7 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'prediction-history' && (
+      {currentSection === 'prediction-history' && (
         <div className="glass-card customer-panel-card">
           <h4>Prediction History</h4>
           <div className="customer-table">
@@ -310,18 +383,18 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'reports' && (
+      {currentSection === 'reports' && (
         <div className="glass-card customer-panel-card">
           <h4>Reports</h4>
           <div className="customer-actions">
-            <button type="button" className="button-link" onClick={handleExploreReports}>Download PDF</button>
-            <button type="button" className="ghost-btn" onClick={handleExploreReports}>Export CSV</button>
+            <button type="button" className="button-link" onClick={handleDownloadPDF}>Download PDF</button>
+            <button type="button" className="ghost-btn" onClick={handleExportCSV}>Export CSV</button>
           </div>
           <p className="customer-portal-subtitle">Generate summaries, weekly progress reports, and AI insight exports.</p>
         </div>
       )}
 
-      {section === 'subscription' && (
+      {currentSection === 'subscription' && (
         <div className="glass-card customer-panel-card">
           <h4>My Subscription</h4>
           <p>Pro plan · 1,240 predictions remaining · Renews on 15 August 2026</p>
@@ -332,7 +405,7 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'notifications' && (
+      {currentSection === 'notifications' && (
         <div className="glass-card customer-panel-card">
           <h4>Notifications</h4>
           <ul>
@@ -343,7 +416,7 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'profile' && (
+      {currentSection === 'profile' && (
         <div className="glass-card customer-panel-card">
           <h4>Profile</h4>
           <p>Name: {user?.username || 'Customer User'}</p>
@@ -356,7 +429,7 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'settings' && (
+      {currentSection === 'settings' && (
         <div className="glass-card customer-panel-card">
           <h4>Settings</h4>
           <ul>
@@ -368,7 +441,7 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'help-support' && (
+      {currentSection === 'help-support' && (
         <div className="customer-grid single-grid">
           {supportItems.map((item) => (
             <div key={item.title} className="glass-card customer-panel-card">
@@ -379,12 +452,12 @@ export default function CustomerPortalPage({ section = 'dashboard', user }) {
         </div>
       )}
 
-      {section === 'assistant' && (
+      {currentSection === 'assistant' && (
         <div className="glass-card customer-panel-card">
           <h4>AI Assistant</h4>
           <p>Ask about predictions, reports, or your dashboard and get guided support in real time.</p>
           <div className="customer-actions">
-            <button type="button" className="button-link" onClick={() => navigate('/assistant')}>Start Chat</button>
+            <button type="button" className="button-link" onClick={handleAnalyzeFeedback}>Start Chat</button>
           </div>
         </div>
       )}

@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "e2e:install": "playwright install --with-deps || true",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "axios": "^1.7.0",
@@ -24,10 +26,5 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/jest-dom": "^6.0.0",
     "jsdom": "^22.1.0"
-  }
-  ,
-  "scripts": {
-    "e2e:install": "playwright install --with-deps || true",
-    "e2e": "playwright test"
   }
 }

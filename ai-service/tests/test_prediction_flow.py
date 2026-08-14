@@ -22,3 +22,21 @@ def test_predict_endpoint(client):
     assert "result" in data
     assert data["result"]["language"] == "en"
     assert data["result"]["confidence"] == data["confidence"]
+
+
+def test_negative_review_recommendations_reference_real_issue():
+    from app.ai.recommendation.recommend import recommend_actions
+
+    recommendations = recommend_actions(
+        {"label": "negative", "score": 0.8},
+        {"joy": 0.72, "anger": 0.68, "sadness": 0.82},
+        ["product", "quality", "delivery", "delay"],
+        ["product_quality", "delivery"],
+    )
+
+    joined = " ".join(recommendations).lower()
+    assert "delivery" in joined
+    assert "delay" in joined
+    assert "product quality" in joined
+    assert "investigate the issues around" not in joined
+    assert "prioritize follow-up on" not in joined

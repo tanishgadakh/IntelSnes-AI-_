@@ -55,5 +55,9 @@ class PredictionService:
             analytics_repo = AnalyticsRepository(self.session)
             await analytics_repo.save(analytics_payload)
         except Exception:
+            try:
+                await self.session.rollback()
+            except Exception:
+                pass
             pass
         return payload

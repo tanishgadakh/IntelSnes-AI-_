@@ -17,9 +17,11 @@ async def assistant(req: AssistantRequest, db: AsyncSession = Depends(get_db_ses
     prediction = await prediction_service.predict(req.prompt, req.source)
     sentiment = prediction["result"].get("sentiment", {})
     sentiment_label = str(sentiment.get("label", "unknown")).title()
-    recommendations = await recommendation_service.suggest(
+    recommendations = prediction["result"].get("recommendations") or await recommendation_service.suggest(
         sentiment,
         prediction["result"].get("keywords", []),
+        prediction["result"].get("topics", []),
+        prediction["result"].get("emotions", {}),
     )
     summary = await summary_service.build_summary(prediction)
     summary_text = summary.get("summary") or "The analysis pipeline completed successfully."

@@ -39,6 +39,10 @@ export default function LoginPage({ onLogin }) {
   const [stageIndex, setStageIndex] = useState(-1);
   const [loginComplete, setLoginComplete] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [otpMode, setOtpMode] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -78,9 +82,54 @@ export default function LoginPage({ onLogin }) {
 
     try {
       const res = await api.post('/api/auth/login', { username: email, password });
+      
+      // Check if OTP is required (new flow)
+      if (res.data?.requires_otp || res.data?.otp_required) {
+        setPendingEmail(email);
+        setOtpMode(true);
+        setToastMessage('Verification code sent to your email. Check MailHog at http://localhost:8025');
+        setPassword('');
+      } else {
+        // Legacy flow (without OTP)
+        const token = res.data?.token || '';
+        const role = normalizeRole(res.data?.role || parseJwt(token)?.role || 'ANALYST');
+        const authPayload = { token, role, username: res.data?.username || email };
+
+        if (rememberMe) {
+          localStorage.setItem('intelsense-token', token);
+          localStorage.setItem('intelsense-role', role);
+          localStorage.setItem('intelsense-username', authPayload.username);
+        } else {
+          localStorage.removeItem('intelsense-token');
+          localStorage.removeItem('intelsense-role');
+          localStorage.removeItem('intelsense-username');
+        }
+
+        startLoginSequence(authPayload);
+      }
+    } catch (err) {
+      const message = err?.response?.data?.message || err?.response?.data?.detail || 'Unable to sign in. Please verify your backend is running.';
+      setErrorMessage(message);
+      setToastMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    if (!otpCode.trim()) {
+      setErrorMessage('Verification code is required.');
+      return;
+    }
+    setOtpLoading(true);
+
+    try {
+      const res = await api.post('/api/auth/verify-otp', { email: pendingEmail, code: otpCode });
       const token = res.data?.token || '';
       const role = normalizeRole(res.data?.role || parseJwt(token)?.role || 'ANALYST');
-      const authPayload = { token, role, username: res.data?.username || email };
+      const authPayload = { token, role, username: res.data?.username || pendingEmail };
 
       if (rememberMe) {
         localStorage.setItem('intelsense-token', token);
@@ -94,11 +143,11 @@ export default function LoginPage({ onLogin }) {
 
       startLoginSequence(authPayload);
     } catch (err) {
-      const message = err?.response?.data?.message || err?.response?.data?.detail || 'Unable to sign in. Please verify your backend is running.';
+      const message = err?.response?.data?.message || err?.response?.data?.detail || 'Invalid verification code.';
       setErrorMessage(message);
       setToastMessage(message);
     } finally {
-      setLoading(false);
+      setOtpLoading(false);
     }
   };
 
@@ -139,36 +188,67 @@ export default function LoginPage({ onLogin }) {
           <div className="brand-block">
             <div className="brand-mark">✦</div>
             <div>
-              <h1>Sign in</h1>
-              <p>Access your role-based AI workspace.</p>
+              <h1>{otpMode ? 'Verify Code' : 'Sign in'}</h1>
+              <p>{otpMode ? 'Enter the code sent to your email.' : 'Access your role-based AI workspace.'}</p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <label>Email Address</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
-            <label>Password</label>
-            <div className="password-row">
-              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" />
-              <button type="button" className="toggle-password" onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Hide' : 'Show'}</button>
-            </div>
-            <div className="form-row">
-              <label className="checkbox-label">
-                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
-                Remember me
-              </label>
-              <Link className="link-muted" to="/forgot-password">Forgot Password?</Link>
-            </div>
-            <button type="submit" className="primary-btn" disabled={loading || loginComplete}>
-              {loading ? 'Signing In...' : 'Sign In'}
-            </button>
-            <div className="auth-divider">OR</div>
-            <div className="social-login-grid">
-              <button type="button" className="social-button google" onClick={() => handleSocialClick('Google')}>Continue with Google</button>
-              <button type="button" className="social-button microsoft" onClick={() => handleSocialClick('Microsoft')}>Continue with Microsoft</button>
-            </div>
-            <p className="auth-link">Don't have an account? <Link to="/register">Create Account</Link></p>
-          </form>
+          {!otpMode ? (
+            <form onSubmit={handleSubmit}>
+              <label>Email Address</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
+              <label>Password</label>
+              <div className="password-row">
+                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" />
+                <button type="button" className="toggle-password" onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Hide' : 'Show'}</button>
+              </div>
+              <div className="form-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+                  Remember me
+                </label>
+                <Link className="link-muted" to="/forgot-password">Forgot Password?</Link>
+              </div>
+              <button type="submit" className="primary-btn" disabled={loading || loginComplete}>
+                {loading ? 'Signing In...' : 'Sign In'}
+              </button>
+              <div className="auth-divider">OR</div>
+              <div className="social-login-grid">
+                <button type="button" className="social-button google" onClick={() => handleSocialClick('Google')}>Continue with Google</button>
+                <button type="button" className="social-button microsoft" onClick={() => handleSocialClick('Microsoft')}>Continue with Microsoft</button>
+              </div>
+              <p className="auth-link">Don't have an account? <Link to="/register">Create Account</Link></p>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpSubmit}>
+              <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem', color: '#cbd5e0' }}>
+                We sent a verification code to <strong>{pendingEmail}</strong>
+              </p>
+              <label>Verification Code</label>
+              <input 
+                type="text" 
+                value={otpCode} 
+                onChange={(e) => setOtpCode(e.target.value)} 
+                placeholder="000000"
+                maxLength="6"
+                style={{ fontSize: '1.5rem', textAlign: 'center', letterSpacing: '0.5rem' }}
+              />
+              <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#a0aec0' }}>
+                Check MailHog at http://localhost:8025 to find your code
+              </p>
+              <button type="submit" className="primary-btn" disabled={otpLoading || loginComplete}>
+                {otpLoading ? 'Verifying...' : 'Verify & Sign In'}
+              </button>
+              <button 
+                type="button" 
+                className="ghost-btn" 
+                onClick={() => { setOtpMode(false); setOtpCode(''); setErrorMessage(''); }}
+                style={{ marginTop: '1rem' }}
+              >
+                Back to Sign In
+              </button>
+            </form>
+          )}
 
           {loginComplete && (
             <div className="stage-card">
