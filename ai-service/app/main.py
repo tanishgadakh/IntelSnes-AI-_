@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app import models  # noqa: F401  # register SQLAlchemy models before schema creation
+from app.api import admin, alerts, analytics, assistant, auth, health, history, prediction, recommendation, reports, summary
+from app.cache.redis_client import redis_client
 from app.core.config import settings
 from app.core.logging import init_logging
-from app.api import health, prediction, summary, analytics, recommendation, admin, history, assistant, reports, alerts, auth
-from app.middleware.request_logging import RequestLoggingMiddleware
+from app.database.session import init_db
 from app.middleware.exception_handler import ExceptionMiddleware
 from app.middleware.jwt_auth import JWTAuthMiddleware
-from app.cache.redis_client import redis_client
+from app.middleware.request_logging import RequestLoggingMiddleware
 from app.services.ai_manager import AIManager
-
-
 from fastapi.openapi.utils import get_openapi
 
 
@@ -59,9 +60,9 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     async def startup():
+        await init_db()
         await redis_client.connect()
         await AIManager.initialize(use_dummy=settings.USE_DUMMY_MODELS)
-        # start background alert scheduler
         try:
             from app.services.alert_scheduler import AlertScheduler
             await AlertScheduler.start()

@@ -42,7 +42,7 @@ class Settings(BaseSettings):
             return url
 
         username = quote_plus(parsed.username)
-        password = quote_plus(parsed.password)
+        password = quote_plus(parsed.password.replace('%40', '@'))
         host = parsed.hostname or ""
         port = f":{parsed.port}" if parsed.port else ""
         netloc = f"{username}:{password}@{host}{port}"
@@ -51,7 +51,8 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         if self.DATABASE_URL:
-            return self._normalize_database_url(self.DATABASE_URL)
+            normalized = self._normalize_database_url(self.DATABASE_URL)
+            return normalized
         return DatabaseSettings().dsn
 
 

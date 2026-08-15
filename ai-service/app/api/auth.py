@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException, Depends
 from pydantic import BaseModel
+from sqlalchemy.exc import OperationalError
 from app.services.email_service import send_password_reset, send_otp
 from app.core.security import encode_jwt, decode_jwt
 from app.repositories.user_repository import UserRepository
@@ -150,21 +151,34 @@ class LoginRequest(BaseModel):
 async def login(req: LoginRequest, db: AsyncSession = Depends(get_db_session)):
     """Authenticate user with two-step OTP verification."""
     repo = UserRepository(db)
-    # support username as email
-    user = await repo.get_by_email(req.username) or await repo.get_by_username(req.username)
+    try:
+        # support username as email
+        user = await repo.get_by_email(req.username) or await repo.get_by_username(req.username)
+    except OperationalError:
+        raise HTTPException(
+            status_code=503,
+            detail="Database unavailable. Please ensure MySQL is running and reachable.",
+        )
+
     if not user:
         raise HTTPException(status_code=404, detail='User not found')
     if not user.password_hash or not verify_password(req.password, user.password_hash):
         raise HTTPException(status_code=401, detail='Invalid credentials')
-    
+
     # Send OTP to all users (two-step authentication)
     code = f"{random.randint(100000,999999)}"
     expires = datetime.utcnow() + timedelta(minutes=10)
-    await repo.set_otp(user, code, expires)
-    
+    try:
+        await repo.set_otp(user, code, expires)
+    except OperationalError:
+        raise HTTPException(
+            status_code=503,
+            detail="Database unavailable. Please ensure MySQL is running and reachable.",
+        )
+
     # Try to send email, but don't fail if email fails
-    email_sent = send_otp(user.email or user.username, code)
-    
+    send_otp(user.email or user.username, code)
+
     return {
         "status": "otp_required",
         "requires_otp": True,

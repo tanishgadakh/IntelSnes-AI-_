@@ -2,12 +2,26 @@
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.engine import async_session
+from app.database.base import Base
+from app.database.engine import async_session, engine
+
+logger = logging.getLogger(__name__)
+
+
+async def init_db() -> None:
+    """Create required SQLAlchemy tables when the configured database is reachable."""
+    try:
+        async with engine.begin() as connection:
+            await connection.run_sync(lambda sync_conn: Base.metadata.create_all(bind=sync_conn))
+        logger.info("Database initialization complete")
+    except Exception:
+        logger.exception("Database initialization failed; continuing without schema bootstrapping")
 
 
 @asynccontextmanager

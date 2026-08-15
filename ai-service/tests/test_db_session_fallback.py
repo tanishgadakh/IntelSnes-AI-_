@@ -1,10 +1,10 @@
 import pytest
+from sqlalchemy.exc import OperationalError
 
 from app.database import session
 
 
 class DummySession:
-    def __init__(self):
         self.rollback_called = False
 
     async def commit(self):
@@ -42,3 +42,19 @@ async def test_get_db_suppresses_commit_failures_and_rolls_back(monkeypatch):
         assert current_session is db_session
 
     assert db_session.rollback_called is True
+
+
+def test_login_returns_503_when_database_unavailable(monkeypatch):
+    from app.main import app
+    from fastapi.testclient import TestClient
+
+    def raise_db_error(self, email):
+        raise OperationalError("SELECT 1", {}, Exception("Can't connect to MySQL server on 'localhost'"))
+
+    monkeypatch.setattr("app.repositories.user_repository.UserRepository.get_by_email", raise_db_error)
+
+    with TestClient(app) as client:
+        response = client.post("/api/v1/auth/login", json={"username": "demo", "password": "demo123"})
+
+    assert response.status_code == 503
+    assert "Database unavailable" in response.json()["message"]
