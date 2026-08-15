@@ -37,10 +37,12 @@ async def password_reset(req: PasswordResetRequest = Body(...), db: AsyncSession
     # generate short-lived token (5 minutes)
     payload = {"sub": req.email, "type": "password_reset", "exp": int(time.time()) + 300}
     token = encode_jwt(payload)
-    
-    # mark reset token validity
-    await repo.set_reset_token_expiry(user, datetime.utcnow() + timedelta(minutes=5))
-    
+
+    # Only persist reset tracking for known users. Unknown emails should still
+    # return a safe success response without crashing the request pipeline.
+    if user:
+        await repo.set_reset_token_expiry(user, datetime.utcnow() + timedelta(minutes=5))
+
     ok = send_password_reset(req.email, token)
     if not ok:
         raise HTTPException(status_code=500, detail="Failed to send reset email")

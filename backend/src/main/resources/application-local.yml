@@ -1,4 +1,4 @@
-server:
+ent server:
   port: 8080
 
 spring:

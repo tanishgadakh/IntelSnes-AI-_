@@ -10,24 +10,19 @@ except Exception:
 
 
 def predict_sentiment(text: str):
-    # honor explicit dummy mode
     if settings.USE_DUMMY_MODELS:
         return dummy_sentiment(text)
 
-    # prefer manager-provided instance if available
     try:
         manager = AIManager
         sentiment_instance = getattr(manager, "_sentiment", None)
         if sentiment_instance:
-            try:
-                return sentiment_instance.predict(text)
-            except Exception:
-                pass
+            return sentiment_instance.predict(text)
 
-        # fallback to creating a local model instance
         if SentimentModel is None:
-            return dummy_sentiment(text)
+            raise RuntimeError("Sentiment model is unavailable.")
+
         model = SentimentModel()
         return model.predict(text)
-    except Exception:
-        return dummy_sentiment(text)
+    except Exception as exc:
+        raise RuntimeError("Sentiment model could not produce a real prediction.") from exc

@@ -10,10 +10,14 @@ except Exception:
 def extract_topics(text: str):
     if settings.USE_DUMMY_MODELS:
         return dummy_topics(text)
+
     if topic_model_predict is None:
-        return dummy_topics(text)
+        raise RuntimeError("Topic model is unavailable.")
+
     try:
         topics = topic_model_predict([text])
-        return topics or dummy_topics(text)
-    except Exception:
-        return dummy_topics(text)
+        if not topics:
+            raise RuntimeError("Topic model returned no topics.")
+        return topics
+    except Exception as exc:
+        raise RuntimeError("Topic model could not produce a real result.") from exc

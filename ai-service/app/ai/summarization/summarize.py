@@ -13,18 +13,15 @@ def summarize_text(text: str):
     if settings.USE_DUMMY_MODELS:
         return dummy_summary(text)
 
-    # prefer manager-provided summarizer
     try:
         summarizer = getattr(AIManager, "_summarizer", None)
         if summarizer:
-            try:
-                return summarizer.summarize(text)
-            except Exception:
-                pass
+            return summarizer.summarize(text)
 
         if SummarizationModel is None:
             raise RuntimeError("Summarization model is unavailable. Install transformers and torch for real model support.")
+
         model = SummarizationModel()
         return model.summarize(text)
-    except Exception:
-        return dummy_summary(text)
+    except Exception as exc:
+        raise RuntimeError("Summarization model could not produce a real summary.") from exc

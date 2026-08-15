@@ -12,7 +12,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-mysql+aiomysql://Tanishg16:Tanish@2009@db:3306/intelsense_ai}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       JWT_SECRET: ${JWT_SECRET:-change-me-local-intelsense-ai-jwt-signing-key-2026}
-      USE_DUMMY_MODELS: ${USE_DUMMY_MODELS:-true}
+      USE_DUMMY_MODELS: ${USE_DUMMY_MODELS:-false}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     volumes:
       - .:/app

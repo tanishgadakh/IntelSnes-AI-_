@@ -15,23 +15,23 @@ class AIManager:
     _initialized = False
 
     @classmethod
-    async def initialize(cls, use_dummy: bool = True):
+    async def initialize(cls, use_dummy: bool = False):
         if cls._initialized:
             return
         if use_dummy:
             DummyModels.register()
             cls._initialized = True
             return
-        # attempt to initialize real model wrappers; fall back to dummy models on error
+
         try:
             cls._sentiment = SentimentModel()
             cls._summarizer = SummarizationModel()
             cls._initialized = True
-        except Exception:
-            DummyModels.register()
+        except Exception as exc:
             cls._sentiment = None
             cls._summarizer = None
             cls._initialized = True
+            raise RuntimeError("Real AI models failed to initialize. Ensure the model dependencies are installed and USE_DUMMY_MODELS is explicitly enabled only for local smoke tests.") from exc
 
     @classmethod
     def list_models(cls):

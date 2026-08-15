@@ -1,4 +1,9 @@
 from app.core.security import encode_jwt
+from app.core.config import settings
+
+
+def test_dummy_models_are_disabled_by_default():
+    assert settings.USE_DUMMY_MODELS is False
 
 
 def test_docs_endpoint_is_public(client):

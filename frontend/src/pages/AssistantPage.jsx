@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bot, Send, Sparkles } from 'lucide-react';
-import api from '../api/client';
+import aiClient from '../api/aiClient';
 import { parseJwt } from '../utils/jwt';
 
 const starterMessages = [
@@ -37,28 +37,30 @@ export default function AssistantPage({ token }) {
     setLoading(true);
 
     try {
-      const res = await api.post('/api/assistant', { prompt }, {
+      const res = await aiClient.post('/assistant', { prompt }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       const data = res.data || {};
-      const responseText = data.response || data.summary || 'No response received from the AI service.';
+      const responseText = data.response || data.summary || data.assistant_message || 'No response received from the AI service.';
       setMessages((prev) => [...prev.slice(0, -1), { role: 'assistant', text: responseText }]);
       setAssistantDetails({
-        summary: data.summary,
+        summary: data.summary || data.response || data.assistant_message,
         sentiment: data.sentiment,
         emotions: data.emotions,
         aspects: data.aspects,
         keywords: data.keywords,
         topics: data.topics,
-        recommendations: data.recommendations,
-        actionableRecommendations: data.actionableRecommendations,
+        recommendations: data.recommendations || data.actionableRecommendations,
+        actionableRecommendations: data.actionableRecommendations || data.recommendations,
         explainability: data.explainability,
         language: data.language,
         confidence: data.confidence,
       });
-    } catch {
-      setMessages((prev) => [...prev.slice(0, -1), { role: 'assistant', text: 'Unable to generate a response. Please try again later.' }]);
-      setError('Assistant service failed. Check that the backend and AI service are running.');
+    } catch (err) {
+      const message = err?.response?.data?.detail || err?.response?.data?.message || 'Unable to generate a response. Please try again later.';
+      setMessages((prev) => [...prev.slice(0, -1), { role: 'assistant', text: message }]);
+      setError('Assistant service failed. Check that the AI service is running.');
     } finally {
       setLoading(false);
     }
@@ -67,7 +69,7 @@ export default function AssistantPage({ token }) {
   // fetch simple analytics overview for trends/alerts
   const fetchAnalytics = async () => {
     try {
-      const resp = await api.get('/api/analytics/overview', { headers: { Authorization: `Bearer ${token}` } });
+      const resp = await aiClient.get('/analytics/overview', { headers: { Authorization: `Bearer ${token}` } });
       setAnalyticsOverview(resp.data || null);
     } catch (e) {
       setAnalyticsOverview(null);
@@ -139,18 +141,38 @@ export default function AssistantPage({ token }) {
                   </div>
                 )}
                 {assistantDetails.keywords?.length > 0 && (
-                  <div>
+                  <div className="assistant-chip-block">
                     <h5>Keywords</h5>
-                    <p>{assistantDetails.keywords.join(', ')}</p>
+                    <div className="ai-chip-row">
+                      {assistantDetails.keywords.map((keyword, index) => (
+                        <span key={`${keyword}-${index}`} className="ai-chip keyword-chip">{keyword}</span>
+                      ))}
+                    </div>
                   </div>
                 )}
                 {assistantDetails.topics?.length > 0 && (
-                  <div>
+                  <div className="assistant-chip-block">
                     <h5>Topics</h5>
-                    <p>{assistantDetails.topics.join(', ')}</p>
+                    <div className="ai-chip-row">
+                      {assistantDetails.topics.map((topic, index) => (
+                        <span key={`${topic}-${index}`} className="ai-chip topic-chip">{topic}</span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
+              {assistantDetails.emotions && Object.keys(assistantDetails.emotions).length > 0 && (
+                <div className="assistant-section">
+                  <h5>Emotions</h5>
+                  <div className="ai-chip-row">
+                    {Object.entries(assistantDetails.emotions).map(([name, value]) => (
+                      <span key={name} className="ai-chip emotion-chip">
+                        {name}: {Number(value).toFixed(2)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {assistantDetails.aspects?.length > 0 && (
                 <div className="assistant-section">
                   <h5>Aspect analysis</h5>
