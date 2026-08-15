@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import api from '../api/client';
+import AdvancedFilterPanel from '../components/AdvancedFilterPanel';
+import Pagination from '../components/Pagination';
+import { usePagination } from '../hooks/usePagination';
+import { usePerformanceMonitoring } from '../hooks/usePerformanceMonitoring';
 
 const HISTORY_KEY = 'intelsense-history';
 
@@ -19,24 +23,32 @@ function toCSV(rows) {
 }
 
 export default function ReportsPage() {
+  usePerformanceMonitoring('ReportsPage');
   const [message, setMessage] = useState('');
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+  const { paginatedData, currentPage, totalPages, goToPage } = usePagination(filteredData, 10);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const token = localStorage.getItem('intelsense-token') || '';
         const resp = await api.get('/api/feedback', { headers: { Authorization: `Bearer ${token}` } });
-        setHistory(Array.isArray(resp.data) ? resp.data : []);
+        const data = Array.isArray(resp.data) ? resp.data : [];
+        setHistory(data);
+        setFilteredData(data);
         setError('');
       } catch {
         const stored = localStorage.getItem(HISTORY_KEY);
         try {
-          setHistory(stored ? JSON.parse(stored) : []);
+          const data = stored ? JSON.parse(stored) : [];
+          setHistory(data);
+          setFilteredData(data);
         } catch {
           setHistory([]);
+          setFilteredData([]);
         }
         setError('Live export data is unavailable; using the latest stored history.');
       } finally {
@@ -48,17 +60,17 @@ export default function ReportsPage() {
   }, []);
 
   const summaryCards = useMemo(() => [
-    { label: 'PDF', value: history.length > 0 ? 'Ready' : 'Pending' },
-    { label: 'CSV', value: history.length > 0 ? 'Ready' : 'Pending' },
-    { label: 'Dashboard pack', value: history.length > 0 ? 'Ready' : 'Pending' }
-  ], [history.length]);
+    { label: 'Total Records', value: history.length },
+    { label: 'Filtered Results', value: filteredData.length },
+    { label: 'Current Page', value: `${currentPage} / ${totalPages}` }
+  ], [history.length, filteredData.length, currentPage, totalPages]);
 
   const exportCsv = async () => {
+    const rowsToExport = filteredData.length > 0 ? filteredData : history;
     try {
       const token = localStorage.getItem('intelsense-token') || '';
       const resp = await api.get('/api/reports', { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
 
-      // Get filename from content-disposition if present
       const cd = resp.headers && resp.headers['content-disposition'];
       let filename = 'intelsense_history.csv';
       if (cd) {
@@ -76,16 +88,16 @@ export default function ReportsPage() {
       setMessage('CSV download started');
       setTimeout(() => setMessage(''), 2000);
     } catch (e) {
-      // fallback to client-side export if server fails
       try {
         const raw = localStorage.getItem(HISTORY_KEY) || '[]';
         const rows = JSON.parse(raw);
-        if (!rows || rows.length === 0) {
+        const exportRows = rowsToExport.length > 0 ? rowsToExport : rows;
+        if (!exportRows || exportRows.length === 0) {
           setMessage('No historical predictions to export.');
           setTimeout(() => setMessage(''), 3000);
           return;
         }
-        const csv = toCSV(rows.map((r) => ({ review: r.review, sentiment: r.sentiment?.label || '', summary: r.summary || '', recommendations: (r.recommendations || []).join(' | ') })));
+        const csv = toCSV(exportRows.map((r) => ({ review: r.review || r.text, sentiment: r.sentiment?.label || r.aiResult || '', summary: r.summary || '', recommendations: (r.recommendations || []).join(' | ') })));
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -105,28 +117,81 @@ export default function ReportsPage() {
   return (
     <div className="reports-page">
       <div className="hero-card">
-        <h2>Reports & exports</h2>
-        <p>Generate professional reports for stakeholders within seconds.</p>
+        <h2>Reports & Exports</h2>
+        <p>Generate professional reports for stakeholders within seconds with advanced filtering and pagination.</p>
       </div>
+
       <div className="panel report-actions">
-        <button className="primary-btn" onClick={exportCsv}>Generate report</button>
-        <button className="primary-btn" onClick={exportCsv} style={{ marginLeft: 12 }}>Export CSV (history)</button>
+        <div className="action-buttons">
+          <button className="primary-btn" onClick={exportCsv} aria-label="Generate report">
+            📄 Generate Report
+          </button>
+          <button className="primary-btn" onClick={exportCsv} aria-label="Export CSV">
+            📊 Export CSV
+          </button>
+        </div>
+
         <div className="report-metrics">
           {summaryCards.map((card) => (
-            <div key={card.label} className="metric-card"><p>{card.label}</p><h3>{card.value}</h3></div>
+            <div key={card.label} className="metric-card" role="region" aria-label={`${card.label}: ${card.value}`}>
+              <p>{card.label}</p>
+              <h3>{card.value}</h3>
+            </div>
           ))}
         </div>
       </div>
+
+      <AdvancedFilterPanel data={history} onFilter={setFilteredData} />
+
       <div className="panel report-preview">
-        <h3>Last generated report</h3>
-        {loading ? <p>Loading report data…</p> : (
+        <h3>Report Data</h3>
+        {loading ? (
+          <p className="loading">Loading report data…</p>
+        ) : (
           <>
-            <p>{history.length > 0 ? `Customer satisfaction trend report • ${history.length} stored records available` : 'No saved predictions yet. Run an analysis to generate a report.'}</p>
-            {error && <p className="message">{error}</p>}
-            {message && <p className="message">{message}</p>}
+            {error && <p className="message error">{error}</p>}
+            {message && <p className="message success">{message}</p>}
+
+            {filteredData.length === 0 ? (
+              <p>No records match your filters. Try adjusting your search criteria.</p>
+            ) : (
+              <>
+                <div className="report-table-container">
+                  <table className="report-table" role="table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Text</th>
+                        <th>Sentiment</th>
+                        <th>Result</th>
+                        <th>Source</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedData.map((item, idx) => (
+                        <tr key={idx}>
+                          <td>{new Date(item.createdAt || item.created_at).toLocaleDateString()}</td>
+                          <td>{item.text?.substring(0, 50)}...</td>
+                          <td>
+                            <span className={`sentiment-badge ${(item.sentiment?.label || 'neutral').toLowerCase()}`}>
+                              {item.sentiment?.label || 'Neutral'}
+                            </span>
+                          </td>
+                          <td>{item.aiResult?.substring(0, 50)}...</td>
+                          <td>{item.source || 'Direct'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {totalPages > 1 && (
+                  <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} />
+                )}
+              </>
+            )}
           </>
         )}
-        <button className="ghost-btn" onClick={exportCsv}>Download report</button>
       </div>
     </div>
   );

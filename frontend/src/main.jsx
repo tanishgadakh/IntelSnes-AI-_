@@ -8,3 +8,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 );
+
+// Register Service Worker for offline-first caching
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(
+      (registration) => {
+        console.info('✓ Service Worker registered for offline support');
+      },
+      (error) => {
+        console.info('Service Worker registration failed:', error);
+      }
+    );
+  });
+}
+
