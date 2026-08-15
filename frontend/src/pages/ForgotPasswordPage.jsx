@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/client';
+import aiClient from '../api/aiClient';
 import Toast from '../components/Toast';
 
 export default function ForgotPasswordPage() {
@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      await api.post('/api/v1/auth/password-reset', { email });
+      await aiClient.post('/auth/password-reset', { email });
       setSuccess(true);
       setMessage('✓ Reset link sent! Check your email. Link is valid for 5 minutes.');
     } catch (err) {

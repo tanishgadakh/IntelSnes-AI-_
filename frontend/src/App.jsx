@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { parseJwt } from './utils/jwt';
 import Layout from './components/Layout';
+import { DarkModeProvider } from './components/DarkMode';
+import { ToastProvider } from './components/ToastNotification';
+import Breadcrumb from './components/Breadcrumb';
 import LandingPage from './pages/LandingPage';
 import FeaturesPage from './pages/FeaturesPage';
 import SolutionsPage from './pages/SolutionsPage';
@@ -107,7 +110,9 @@ export default function App() {
   };
 
   return (
-    <BrowserRouter>
+    <DarkModeProvider>
+      <ToastProvider />
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/features" element={<FeaturesPage />} />

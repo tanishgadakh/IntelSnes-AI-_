@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/client';
+import aiClient from '../api/aiClient';
 import { parseJwt } from '../utils/jwt';
 import Toast from '../components/Toast';
 
@@ -81,7 +81,7 @@ export default function LoginPage({ onLogin }) {
     setLoading(true);
 
     try {
-      const res = await api.post('/api/auth/login', { username: email, password });
+      const res = await aiClient.post('/auth/login', { username: email, password });
       
       // Check if OTP is required (new flow)
       if (res.data?.requires_otp || res.data?.otp_required) {
@@ -126,7 +126,7 @@ export default function LoginPage({ onLogin }) {
     setOtpLoading(true);
 
     try {
-      const res = await api.post('/api/auth/verify-otp', { email: pendingEmail, code: otpCode });
+      const res = await aiClient.post('/auth/verify-otp', { email: pendingEmail, code: otpCode });
       const token = res.data?.token || '';
       const role = normalizeRole(res.data?.role || parseJwt(token)?.role || 'ANALYST');
       const authPayload = { token, role, username: res.data?.username || pendingEmail };

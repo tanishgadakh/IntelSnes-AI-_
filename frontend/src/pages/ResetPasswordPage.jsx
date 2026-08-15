@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/client';
+import aiClient from '../api/aiClient';
 
 function calculatePasswordStrength(password) {
   let score = 0;
@@ -70,7 +70,7 @@ export default function ResetPasswordPage() {
 
     setSubmitting(true);
     try {
-      const response = await api.post('/api/v1/auth/password-reset/confirm', {
+      const response = await aiClient.post('/auth/password-reset/confirm', {
         token,
         new_password: password
       });

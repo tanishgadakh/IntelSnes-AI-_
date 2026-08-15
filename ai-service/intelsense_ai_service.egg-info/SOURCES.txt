@@ -7,6 +7,8 @@ intelsense_ai_service.egg-info/SOURCES.txt
 intelsense_ai_service.egg-info/dependency_links.txt
 intelsense_ai_service.egg-info/requires.txt
 intelsense_ai_service.egg-info/top_level.txt
+tests/test_api_endpoints.py
 tests/test_database_engine.py
 tests/test_db_session_fallback.py
+tests/test_password_reset_flow.py
 tests/test_prediction_flow.py
