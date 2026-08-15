@@ -1,17 +1,27 @@
-import os
 import hashlib
 import secrets
 
+import bcrypt
+
 
 def hash_password(password: str) -> str:
-    """Hash password using PBKDF2 with SHA256."""
+    """Hash password using PBKDF2 with SHA256 for AI-service-local users."""
     salt = secrets.token_hex(16)
     dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 100000)
     return f"{salt}${dk.hex()}"
 
 
 def verify_password(password: str, stored: str) -> bool:
-    """Verify password against stored hash."""
+    """Verify a password against either PBKDF2 or BCrypt-hashed values."""
+    if not stored:
+        return False
+
+    try:
+        if stored.startswith('$2') or stored.startswith('$2a') or stored.startswith('$2b'):
+            return bcrypt.checkpw(password.encode('utf-8'), stored.encode('utf-8'))
+    except Exception:
+        pass
+
     try:
         salt, hexhash = stored.split('$', 1)
         dk = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 100000)

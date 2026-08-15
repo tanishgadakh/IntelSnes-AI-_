@@ -16,8 +16,9 @@ class UserRepository(BaseRepository):
 
     async def set_password_hash(self, user: User, password_hash: str):
         """Update password and save previous for reuse check."""
-        user.password_previous = user.password_hash  # store old hash
+        user.password_previous = user.password_hash or user.password
         user.password_hash = password_hash
+        user.password = password_hash
         self.session.add(user)
         await self.session.flush()
         await self.session.refresh(user)

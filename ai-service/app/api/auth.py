@@ -162,7 +162,9 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db_session)):
 
     if not user:
         raise HTTPException(status_code=404, detail='User not found')
-    if not user.password_hash or not verify_password(req.password, user.password_hash):
+
+    stored_password = user.password_hash or user.password
+    if not stored_password or not verify_password(req.password, stored_password):
         raise HTTPException(status_code=401, detail='Invalid credentials')
 
     # Send OTP to all users (two-step authentication)
